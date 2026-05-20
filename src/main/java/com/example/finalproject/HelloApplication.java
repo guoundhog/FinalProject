@@ -16,7 +16,7 @@ public class HelloApplication extends Application {
         stage.setScene(scene);
         stage.show();
     }
-
+//我是白癡
     public static void main(String[] args) {
         launch();
     }
