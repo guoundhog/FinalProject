@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Pane?>
+
+<Pane fx:id="menuPane" focusTraversable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#handleKeyPressed" prefHeight="630.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.finalproject.MenuController">
+   <children>
+      <ImageView fx:id="picture" fitHeight="630.0" fitWidth="720.0" pickOnBounds="true">
+         <image>
+            <Image url="@../../../image/章同學圖片.jpg" />
+         </image>
+      </ImageView>
+   </children>
+</Pane>
