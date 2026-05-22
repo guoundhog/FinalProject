@@ -1,6 +1,7 @@
 package com.example.finalproject;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -17,13 +18,13 @@ public class SceneManager {
         try {
 
             FXMLLoader loader =
-                    new FXMLLoader(
-                            SceneManager.class.getResource("/fxml/" + fxml)
-                    );
+                    new FXMLLoader(SceneManager.class.getResource("/fxml/" + fxml));
 
-            Scene scene = new Scene(loader.load());
+            Parent root = loader.load();
 
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
+
+            stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
