@@ -1,19 +1,13 @@
 package com.example.finalproject;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class HelloApplication extends Application {
     @Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("menu.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 720, 630);
-        stage.setTitle("Hello!");
-        stage.setScene(scene);
+    public void start(Stage stage) throws Exception  {
+        SceneManager.setStage(stage);
+        SceneManager.switchScene("menu.fxml");
         stage.show();
     }
 //我是白癡

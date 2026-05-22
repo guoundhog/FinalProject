@@ -1,5 +1,6 @@
 package com.example.finalproject;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -14,9 +15,16 @@ public class MenuController {
     private ImageView picture;
 
     @FXML
+    public void initialize() {
+        Platform.runLater(() -> {
+            menuPane.requestFocus();
+        });
+    }
+
+    @FXML
     private void handleKeyPressed(KeyEvent e) {
         if (e.getCode() == KeyCode.ENTER) {
-            picture.setOpacity(0);
+            SceneManager.switchScene("level1.fxml");
         }
     }
 }
