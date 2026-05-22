@@ -1,6 +1,7 @@
 package com.example.finalproject;
 
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -104,7 +105,9 @@ public class Level1Controller {
     private void setupKeyboard() {
 
         root.setFocusTraversable(true);
-//        root.requestFocus();
+        Platform.runLater(() ->{
+            root.requestFocus();
+        });
 
         root.setOnKeyPressed(e -> keys.add(e.getCode()));
 
