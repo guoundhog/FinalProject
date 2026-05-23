@@ -6,8 +6,8 @@ import javafx.scene.image.ImageView;
 public class Player extends ImageView {
 
     public double velocityY = 0;
-    public double maxVelocityY = 12;
-    public int jumpLevel = 0;
+
+    public boolean onGround = false;
 
     public Player() {
 
