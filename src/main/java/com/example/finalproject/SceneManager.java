@@ -22,7 +22,7 @@ public class SceneManager {
 
             Parent root = loader.load();
 
-            stage.setScene(new Scene(root, 800, 600));
+            stage.setScene(new Scene(root));
 
             stage.show();
 

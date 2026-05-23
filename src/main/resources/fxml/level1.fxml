@@ -2,6 +2,10 @@
 
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane fx:id="root" prefHeight="600" prefWidth="800" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.finalproject.Level1Controller">
+<AnchorPane fx:id="root"
+            prefHeight="600"
+            prefWidth="800"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.finalproject.Level1Controller">
 </AnchorPane>

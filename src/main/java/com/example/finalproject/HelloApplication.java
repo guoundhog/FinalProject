@@ -10,9 +10,12 @@ public class HelloApplication extends Application {
 
         SceneManager.setStage(stage);
 
-        SceneManager.switchScene("menu.fxml");
-
         stage.setTitle("Mario Final Project");
+
+        // 先不要讓視窗大小亂變
+        stage.setResizable(false);
+
+        SceneManager.switchScene("menu.fxml");
     }
 
     public static void main(String[] args) {
