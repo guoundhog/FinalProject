@@ -7,7 +7,9 @@ public class Player extends ImageView {
 
     public double velocityY = 0;
 
-    public boolean onGround = false;
+    public double maxVelocityY = -GameConfig.JUMP_POWER;
+
+    public int jumpLevel = 0;
 
     public Player() {
 
