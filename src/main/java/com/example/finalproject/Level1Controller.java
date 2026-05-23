@@ -321,7 +321,13 @@ public class Level1Controller {
             keys.add(e.getCode());
         });
 
-        root.setOnKeyReleased(e -> keys.remove(e.getCode()));
+        root.setOnKeyReleased(e -> {
+            //鬆開SPACE 視為該次跳躍結束
+            if (e.getCode() == KeyCode.SPACE) {
+                mario.jumpLevel = 10;
+            }
+            keys.remove(e.getCode());
+        });
     }
 
 
@@ -365,8 +371,8 @@ public class Level1Controller {
 
     private void movePlayer() {
 
-        // A 鍵向左
-        if (keys.contains(KeyCode.A)) {
+        // A 鍵向左，Mario 不會超出左邊界
+        if (keys.contains(KeyCode.A) && mario.getLayoutX() > 3) {
             mario.setLayoutX(mario.getLayoutX() - GameConfig.MOVE_SPEED);
         }
 
@@ -375,12 +381,12 @@ public class Level1Controller {
             mario.setLayoutX(mario.getLayoutX() + GameConfig.MOVE_SPEED);
         }
 
-        // SPACE 跳躍，必須站在地板上才能跳
-        if (keys.contains(KeyCode.SPACE) && mario.onGround) {
+        // SPACE 跳躍，利用jumpLevel實現長按大跳
+        if (keys.contains(KeyCode.SPACE) && mario.jumpLevel < 10) {
 
             mario.velocityY = GameConfig.JUMP_POWER;
 
-            mario.onGround = false;
+            mario.jumpLevel++;
 
             playJumpSound();
         }
@@ -392,8 +398,11 @@ public class Level1Controller {
 
     private void applyGravity() {
 
-        // 持續增加向下速度
-        mario.velocityY += GameConfig.GRAVITY;
+        // 持續增加向下速度，達到一定程度時停止加速
+        //速度上限之後要整活後可以移除
+        if (mario.velocityY < mario.maxVelocityY) {
+            mario.velocityY += GameConfig.GRAVITY;
+        }
 
         // 套用速度
         mario.setLayoutY(mario.getLayoutY() + mario.velocityY);
@@ -408,7 +417,7 @@ public class Level1Controller {
             mario.velocityY = 0;
 
             // 設定為站在地板上
-            mario.onGround = true;
+            mario.jumpLevel = 0;
         }
     }
 
@@ -422,6 +431,15 @@ public class Level1Controller {
         if (mario.getLayoutX() > GameConfig.CAMERA_START_X) {
             cameraX = mario.getLayoutX() - GameConfig.CAMERA_START_X;
         }
+
+        //稍微讓Mario 可以左右移動，可用可不用
+        /*
+        if (cameraX < mario.getLayoutX() - 380 && cameraX < 5000) {
+            cameraX += Math.max((mario.getLayoutX() - 380 - cameraX) * 0.3, 2);
+        } else if (cameraX > mario.getLayoutX() - 370 && cameraX > 0) {
+            cameraX += Math.min((mario.getLayoutX() - 370 - cameraX) * 0.3, -2);
+        }
+        */
 
         // 只移動遊戲世界，不移動 root
         world.setLayoutX(-cameraX);
