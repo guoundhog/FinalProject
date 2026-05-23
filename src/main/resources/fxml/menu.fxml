@@ -6,7 +6,7 @@
 <?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="600" prefWidth="800" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.finalproject.MenuController">
-   <Label fx:id="classic" layoutX="311.0" layoutY="317.0" onMouseClicked="#classicMode" onMouseEntered="#bigText" onMouseExited="#smallText" text="Classic" textFill="#ba5c3f">
+   <Label fx:id="classic" layoutX="412.0" layoutY="317.0" onMouseClicked="#classicMode" onMouseEntered="#bigText" onMouseExited="#smallText" text="Classic" textFill="#ba5c3f">
       <font>
          <Font name="Garamond" size="67.0" />
       </font>
@@ -14,7 +14,7 @@
          <DropShadow offsetX="5.0" offsetY="2.0" spread="0.5" />
       </effect>
    </Label>
-   <Label fx:id="special" layoutX="311.0" layoutY="396.0" onMouseClicked="#specialMode" onMouseEntered="#bigText" onMouseExited="#smallText" text="Special" textFill="#ba5c3f">
+   <Label fx:id="special" layoutX="412.0" layoutY="396.0" onMouseClicked="#specialMode" onMouseEntered="#bigText" onMouseExited="#smallText" text="Special" textFill="#ba5c3f">
       <font>
          <Font name="Garamond" size="67.0" />
       </font>
