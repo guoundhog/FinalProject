@@ -105,13 +105,18 @@ public class Level1Controller {
     private void setupKeyboard() {
 
         root.setFocusTraversable(true);
-        Platform.runLater(() ->{
+        Platform.runLater(() -> {
             root.requestFocus();
         });
 
         root.setOnKeyPressed(e -> keys.add(e.getCode()));
 
-        root.setOnKeyReleased(e -> keys.remove(e.getCode()));
+        root.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.SPACE) {
+                mario.jumpLevel = 10;
+            }
+            keys.remove(e.getCode());
+        });
     }
 
     private void gameLoop() {
@@ -141,7 +146,7 @@ public class Level1Controller {
 
     private void movePlayer() {
 
-        if (keys.contains(KeyCode.A)) {
+        if (keys.contains(KeyCode.A) && mario.getLayoutX() > 5) {
 
             mario.setLayoutX(mario.getLayoutX() - MOVE_SPEED);
         }
@@ -151,17 +156,18 @@ public class Level1Controller {
             mario.setLayoutX(mario.getLayoutX() + MOVE_SPEED);
         }
 
-        if (keys.contains(KeyCode.SPACE) && mario.onGround) {
+        if (keys.contains(KeyCode.SPACE) && mario.jumpLevel < 10) {
 
             mario.velocityY = JUMP_POWER;
 
-            mario.onGround = false;
+            mario.jumpLevel++;
         }
     }
 
     private void applyGravity() {
-
-        mario.velocityY += GRAVITY;
+        if (mario.velocityY < mario.maxVelocityY) {
+            mario.velocityY += GRAVITY;
+        }
 
         mario.setLayoutY(mario.getLayoutY() + mario.velocityY);
 
@@ -171,13 +177,18 @@ public class Level1Controller {
 
             mario.velocityY = 0;
 
-            mario.onGround = true;
+            mario.jumpLevel = 0;
         }
     }
 
     private void updateCamera() {
 
-        cameraX = mario.getLayoutX() - 400;
+        if (cameraX < mario.getLayoutX() - 380 && cameraX < 5000) {
+            cameraX += Math.max((mario.getLayoutX() - 380 - cameraX) * 0.3, 2);
+        } else if (cameraX > mario.getLayoutX() - 370 && cameraX > 0) {
+            cameraX += Math.min((mario.getLayoutX() - 370 - cameraX) * 0.3, -2);
+        }
+
 
         root.setLayoutX(-cameraX);
     }
