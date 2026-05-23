@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.AnchorPane?>
-<!--<?import javafx.scene.layout.Pane?>-->
+<?import javafx.scene.Group?>
 
 <AnchorPane fx:id="root"
-            prefHeight="790" prefWidth="1540"
+
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.finalproject.Level1Controller">
-    <!-- 真正的遊戲世界 -->
-<!--    <Pane fx:id="world"/>-->
+
+    <!-- 遊戲世界，攝影機只移動這個，不要移動 root -->
+    <Group fx:id="world"/>
+
 </AnchorPane>
