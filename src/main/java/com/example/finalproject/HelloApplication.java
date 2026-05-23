@@ -12,7 +12,7 @@ public class HelloApplication extends Application {
 
         SceneManager.switchScene("menu.fxml");
 
-        stage.setTitle("Mario Final Project");
+        stage.setTitle("Final Project");
     }
 
     public static void main(String[] args) {
