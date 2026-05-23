@@ -8,9 +8,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.Label;
 
 import java.util.HashSet;
 import java.util.Set;
+
 
 public class Level1Controller {
 
@@ -23,17 +25,42 @@ public class Level1Controller {
     private Player mario;
     private ImageView goal;
 
+    private Label fpsLabel;
+    // FPS 計算用
+    private long lastTime = 0;
+
+    private int frames = 0;
+
     private final Set<KeyCode> keys = new HashSet<>();
 
     private double cameraX = 0;
 
     public void initialize() {
-
         createMap();
         createPlayer();
         createGoal();
+        createFPSCounter();
         setupKeyboard();
         gameLoop();
+    }
+    private void createFPSCounter() {
+
+        fpsLabel = new Label("FPS: 0");
+
+        fpsLabel.setStyle(
+                "-fx-text-fill: white;" +
+                        "-fx-font-size: 20px;" +
+                        "-fx-background-color: black;"
+        );
+
+        // 固定在畫面左上角
+        fpsLabel.setLayoutX(20);
+        fpsLabel.setLayoutY(20);
+
+        // 注意：
+        // 要加到 root
+        // 不是 world
+        root.getChildren().add(fpsLabel);
     }
 
     private void createPlayer() {
@@ -121,8 +148,23 @@ public class Level1Controller {
         applyGravity();
         updateCamera();
         checkWin();
+        updateFPS();
     }
+    private void updateFPS() {
 
+        frames++;
+
+        long now = System.nanoTime();
+
+        if (now - lastTime >= 1_000_000_000L) {
+
+            fpsLabel.setText("FPS: " + frames);
+
+            frames = 0;
+
+            lastTime = now;
+        }
+    }
     private void movePlayer() {
 
         if (keys.contains(KeyCode.A)) {

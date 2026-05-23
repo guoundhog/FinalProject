@@ -12,7 +12,7 @@ public class Player extends ImageView {
     public Player() {
 
         Image img =
-                new Image(getClass().getResourceAsStream("/image/mario.jpg"));
+                new Image(getClass().getResourceAsStream("/image/menu.jpg"));
 
         setImage(img);
 

@@ -22,5 +22,5 @@ public class GameConfig {
     public static final double JUMP_POWER = -14.2;
 
     // 攝影機
-    public static final int CAMERA_START_X = 450;
+    public static final int CAMERA_START_X = (int) (WINDOW_WIDTH*0.3);
 }
