@@ -16,11 +16,13 @@ public class Level1Controller {
     @FXML
     private AnchorPane root;
 
-    private final double GRAVITY = 0.5;
+    private final double TILE_SIZE = 80;
 
-    private final double MOVE_SPEED = 5;
+    private final double GRAVITY = 0.4;
 
-    private final double JUMP_POWER = -12;
+    private final double MOVE_SPEED = 3;
+
+    private final double JUMP_POWER = -14.2;
 
     private Player mario;
 
@@ -177,7 +179,10 @@ public class Level1Controller {
 
     private void updateCamera() {
 
-        cameraX = mario.getLayoutX() - 400;
+        //一開始不跟隨
+        if (mario.getLayoutX() > 500) {
+            cameraX = mario.getLayoutX() - 500;
+        }
 
         root.setLayoutX(-cameraX);
     }
