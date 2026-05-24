@@ -38,6 +38,7 @@ public class Level1Controller {
     // ================= 音效與音樂 =================
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
+    private MediaPlayer landingPlayer;
 
     // ================= 設定選單 =================
     private VBox settingPane;
@@ -100,13 +101,20 @@ public class Level1Controller {
         bgmPlayer.play();
 
 
-
         Media jump = new Media(
                 getClass().getResource("/sound/jump.mp3").toExternalForm()
         );
 
         jumpPlayer = new MediaPlayer(jump);
         jumpPlayer.setVolume(0.7);
+
+
+        Media landing = new Media(
+                getClass().getResource("/sound/pipe.mp3").toExternalForm()
+        );
+
+        landingPlayer = new MediaPlayer(landing);
+        landingPlayer.setVolume(0.7);
     }
     private void playJumpSound() {
 
@@ -117,6 +125,16 @@ public class Level1Controller {
         // 先 stop 再 play，避免連續跳躍時音效播不出來
         jumpPlayer.stop();
         jumpPlayer.play();
+    }
+    private void playLandingSound() {
+
+        if (landingPlayer == null) {
+            return;
+        }
+
+        // 先 stop 再 play，避免連續落地時音效播不出來
+        landingPlayer.stop();
+        landingPlayer.play();
     }
 
     // ================= FPS 顯示 =================
@@ -416,8 +434,14 @@ public class Level1Controller {
             // 停止下落
             mario.velocityY = 0;
 
-            // 設定為站在地板上
-            mario.jumpLevel = 0;
+            // 設定為站在地板上，並撥放落地音效
+            if (mario.jumpLevel > 0){
+
+                mario.jumpLevel = 0;
+
+                playLandingSound();
+
+            }
         }
     }
 
