@@ -58,6 +58,14 @@ public class Level1Controller {
 
     // ================= 攝影機 =================
     private double cameraX = 0;
+    // ================= FPS 限制 =================
+
+    // 40 FPS = 1 秒 40 幀
+    // 每幀間隔 = 1_000_000_000 / 40 ns
+    private final long FRAME_INTERVAL = 1_000_000_000L / 40;
+
+    // 上一幀時間
+    private long lastFrameTime = 0;
     // ================= 地圖資料 =================
 
 // 0 = 空氣
@@ -66,15 +74,15 @@ public class Level1Controller {
 // 3 = 終點
 
     private final int[][] map = {
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3}
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
     // ================= 初始化 =================
@@ -250,21 +258,15 @@ public class Level1Controller {
 
     private void createMap() {
 
-        Image dark = new Image(
-                getClass().getResourceAsStream("/image/grass_dark.png")
-        );
+        Image grass = new Image(getClass().getResourceAsStream("/image/grass.jpg"));
 
-        Image light = new Image(
-                getClass().getResourceAsStream("/image/grass_light.png")
-        );
+        Image stone = new Image(getClass().getResourceAsStream("/image/stone0.png"));
 
         // 產生一直線地板
         // 逐列掃描地圖
         for (int row = 0; row < map.length; row++) {
-
             // 逐行掃描地圖
             for (int col = 0; col < map[row].length; col++) {
-
                 // 取得目前格子的代號
                 int tile = map[row][col];
 
@@ -274,14 +276,12 @@ public class Level1Controller {
 
                 // 深綠地板
                 if (tile == 1) {
-
-                    block = new ImageView(dark);
+                    block = new ImageView(grass);
                 }
 
                 // 淺綠地板
                 else if (tile == 2) {
-
-                    block = new ImageView(light);
+                    block = new ImageView(stone);
                 }
 
                 // ================= 終點 =================
@@ -313,7 +313,7 @@ public class Level1Controller {
                     block.setFitHeight(GameConfig.TILE_SIZE);
 
                     // col = X 座標
-                    block.setLayoutX(col * GameConfig.TILE_SIZE);
+                    block.setLayoutX(col * GameConfig.TILE_SIZE - 3);
 
                     // row = Y 座標
                     block.setLayoutY(row * GameConfig.TILE_SIZE);
@@ -366,6 +366,9 @@ public class Level1Controller {
             @Override
             public void handle(long now) {
 
+                // FPS 限制
+                if (now - lastFrameTime < FRAME_INTERVAL) {return;}
+                lastFrameTime = now;
                 update();
             }
         };
@@ -402,7 +405,7 @@ public class Level1Controller {
         }
 
         // D 鍵向右
-        if (keys.contains(KeyCode.D) && mario.getLayoutX() > 3) {
+        if (keys.contains(KeyCode.D) && mario.getLayoutX() < map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
             mario.setLayoutX(mario.getLayoutX() + GameConfig.MOVE_SPEED);
         }
 
@@ -501,7 +504,7 @@ public class Level1Controller {
 
         //稍微讓Mario 可以左右移動，可用可不用
 
-        if (cameraX < mario.getLayoutX() - 380 && cameraX < 700) {
+        if (cameraX < mario.getLayoutX() - 380 && cameraX < map[0].length*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH -6) {
             cameraX += Math.max((mario.getLayoutX() - 380 - cameraX) * 0.3, 2);
         } else if (cameraX > mario.getLayoutX() - 370 && cameraX > 0) {
             cameraX += Math.min((mario.getLayoutX() - 370 - cameraX) * 0.3, -2);
@@ -549,7 +552,6 @@ public class Level1Controller {
 
         // FPS 與設定選單在最上層
         fpsLabel.toFront();
-
         settingPane.toFront();
     }
 }

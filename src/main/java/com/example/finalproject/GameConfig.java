@@ -17,9 +17,9 @@ public class GameConfig {
     public static final int PLAYER_HEIGHT = 50;
 
     // 物理
-    public static final double GRAVITY = 0.4;
-    public static final double MOVE_SPEED = 3;
-    public static final double JUMP_POWER = -14.2;
+    public static final double GRAVITY = 5;
+    public static final double MOVE_SPEED = 10.5;
+    public static final double JUMP_POWER = -40.7;
 
     // 攝影機
     public static final int CAMERA_START_X = (int) (WINDOW_WIDTH*0.3);
