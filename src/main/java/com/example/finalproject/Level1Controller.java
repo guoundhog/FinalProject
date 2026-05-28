@@ -399,18 +399,61 @@ public class Level1Controller {
 
     private void movePlayer() {
 
-        // A 鍵向左，Mario 不會超出左邊界
-        if (keys.contains(KeyCode.A) && mario.getLayoutX() > 3) {
-            mario.setLayoutX(mario.getLayoutX() - GameConfig.MOVE_SPEED);
+        // A 鍵向左加速，Mario 不會超出左邊界
+        if (keys.contains(KeyCode.A) && mario.getLayoutX() > 3) {mario.velocityX -= GameConfig.ACCELERATION;
         }
 
-        // D 鍵向右
+        // D 鍵向右加速，Mario 不會超出地圖右邊界
         if (keys.contains(KeyCode.D) && mario.getLayoutX() < map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
-            mario.setLayoutX(mario.getLayoutX() + GameConfig.MOVE_SPEED);
+            mario.velocityX += GameConfig.ACCELERATION;
         }
 
-        // SPACE 跳躍，利用jumpLevel實現長按大跳
-        if (keys.contains(KeyCode.SPACE) && mario.jumpLevel < 5) {
+        // 沒有按左右鍵時，慢慢減速，產生滑行感
+        if (!keys.contains(KeyCode.A) && !keys.contains(KeyCode.D)) {
+
+            if (mario.velocityX > 0) {
+                mario.velocityX -= GameConfig.FRICTION;
+
+                if (mario.velocityX < 0) {
+                    mario.velocityX = 0;
+                }
+            }
+
+            if (mario.velocityX < 0) {
+                mario.velocityX += GameConfig.FRICTION;
+
+                if (mario.velocityX > 0) {
+                    mario.velocityX = 0;
+                }
+            }
+        }
+
+        // 限制最大水平速度
+        if (mario.velocityX > GameConfig.MOVE_SPEED) {
+            mario.velocityX = GameConfig.MOVE_SPEED;
+        }
+
+        if (mario.velocityX < -GameConfig.MOVE_SPEED) {
+            mario.velocityX = -GameConfig.MOVE_SPEED;
+        }
+
+        // 套用水平速度
+        mario.setLayoutX(mario.getLayoutX() + mario.velocityX);
+
+        // 左邊界限制
+        if (mario.getLayoutX() < 3) {
+            mario.setLayoutX(3);
+            mario.velocityX = 0;
+        }
+
+        // 右邊界限制
+        if (mario.getLayoutX() > map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
+            mario.setLayoutX(map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3);
+            mario.velocityX = 0;
+        }
+
+        // SPACE 跳躍，利用 jumpLevel 實現長按大跳
+        if (keys.contains(KeyCode.SPACE) && mario.jumpLevel < 4 ) {
 
             mario.velocityY = GameConfig.JUMP_POWER;
 
