@@ -1,57 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
 
-<AnchorPane
-            xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.finalproject.MenuController">
-
-    <Label fx:id="classic"
-           layoutX="412.0"
-           layoutY="317.0"
-           onMouseClicked="#classicMode"
-           onMouseEntered="#bigText"
-           onMouseExited="#smallText"
-           text="Classic"
-           textFill="#ba5c3f">
-
-        <font>
-
-            <Font name="Garamond"
-                  size="67.0"/>
-        </font>
-        <effect>
-
-            <DropShadow offsetX="5.0"
-                        offsetY="2.0"
-                        spread="0.5"/>
-        </effect>
-    </Label>
-
-    <Label fx:id="special"
-           layoutX="412.0"
-           layoutY="396.0"
-           onMouseClicked="#specialMode"
-           onMouseEntered="#bigText"
-           onMouseExited="#smallText"
-           text="Special"
-           textFill="#ba5c3f">
-        <font>
-
-            <Font name="Garamond"
-                  size="67.0"/>
-        </font>
-        <effect>
-
-            <DropShadow offsetX="5.0"
-                        offsetY="2.0"
-                        spread="0.5"/>
-        </effect>
-
-    </Label>
+<AnchorPane prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.finalproject.MenuController">
+   <ImageView fitHeight="600.0" fitWidth="1000.0" pickOnBounds="true">
+      <image>
+         <Image url="@../image/menu.png" />
+      </image>
+   </ImageView>
+   <ImageView fx:id="classic" fitHeight="150.0" fitWidth="200.0" layoutX="276.0" layoutY="273.0" onMouseClicked="#classicMode" onMouseEntered="#bigText" onMouseExited="#smallText" pickOnBounds="true">
+      <image>
+         <Image url="@../image/goal.png" />
+      </image>
+   </ImageView>
 
 </AnchorPane>

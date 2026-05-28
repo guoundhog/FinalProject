@@ -5,15 +5,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 
 public class MenuController {
     @FXML
-    private Label classic;
-
-    @FXML
-    private Label special;
+    private ImageView classic;
 
     //一點點動畫效果
     @FXML
