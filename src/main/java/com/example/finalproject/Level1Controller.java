@@ -58,13 +58,38 @@ public class Level1Controller {
 
     // ================= 攝影機 =================
     private double cameraX = 0;
+    // ================= FPS 限制 =================
+
+    // 40 FPS = 1 秒 40 幀
+    // 每幀間隔 = 1_000_000_000 / 40 ns
+    private final long FRAME_INTERVAL = 1_000_000_000L / 40;
+
+    // 上一幀時間
+    private long lastFrameTime = 0;
+    // ================= 地圖資料 =================
+
+// 0 = 空氣
+// 1 = 地板
+// 2 = 石頭
+// 3 = 終點
+
+    private final int[][] map = {
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+    };
 
     // ================= 初始化 =================
     public void initialize() {
         createBackground();
         createMap();
         createPlayer();
-        createGoal();
         createFPSCounter();
         setupMusic();
         createSettingPane();
@@ -74,45 +99,27 @@ public class Level1Controller {
     }
     // ================= 背景 =================
     private void createBackground() {
-
-        Image img = new Image(
-                getClass().getResourceAsStream("/image/background.png")
-        );
-
+        Image img = new Image(getClass().getResourceAsStream("/image/background.jpg"));
         background = new ImageView(img);
-
         background.setFitWidth(GameConfig.WINDOW_WIDTH);
         background.setFitHeight(GameConfig.WINDOW_HEIGHT);
-
         // 背景加到 root，才不會跟著地圖移動
         root.getChildren().add(background);
     }
 
     // ================= 音樂與音效 =================
     private void setupMusic() {
-
-        Media bgm = new Media(
-                getClass().getResource("/sound/bgm.mp3").toExternalForm()
-        );
-
+        Media bgm = new Media(getClass().getResource("/sound/bgm.mp3").toExternalForm());
         bgmPlayer = new MediaPlayer(bgm);
         bgmPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         bgmPlayer.setVolume(0.5);
         bgmPlayer.play();
 
-
-        Media jump = new Media(
-                getClass().getResource("/sound/jump.mp3").toExternalForm()
-        );
-
+        Media jump = new Media(getClass().getResource("/sound/jump.mp3").toExternalForm());
         jumpPlayer = new MediaPlayer(jump);
         jumpPlayer.setVolume(0.7);
 
-
-        Media landing = new Media(
-                getClass().getResource("/sound/pipe.mp3").toExternalForm()
-        );
-
+        Media landing = new Media(getClass().getResource("/sound/pipe.mp3").toExternalForm());
         landingPlayer = new MediaPlayer(landing);
         landingPlayer.setVolume(0.7);
     }
@@ -197,10 +204,7 @@ public class Level1Controller {
             jumpPlayer.setVolume(newValue.doubleValue());
         });
 
-
-
         settingPane = new VBox(15);
-
         settingPane.getChildren().addAll(
                 title,
                 bgmText,
@@ -211,9 +215,7 @@ public class Level1Controller {
 
         settingPane.setLayoutX(GameConfig.WINDOW_WIDTH / 2.0 - 150);
         settingPane.setLayoutY(GameConfig.WINDOW_HEIGHT / 2.0 - 120);
-
         settingPane.setPrefWidth(300);
-
         settingPane.setStyle(
                 "-fx-background-color: rgba(0, 0, 0, 0.75);" +
                         "-fx-padding: 30px;" +
@@ -244,76 +246,81 @@ public class Level1Controller {
     // ================= 建立主角 =================
 
     private void createPlayer() {
-
         mario = new Player();
-
         // 主角起始 X 座標
         mario.setLayoutX(100);
-
         // 讓角色直接站在地板上
         mario.setLayoutY(GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT);
-
         world.getChildren().add(mario);
     }
-
-
-
-    // ================= 建立終點 =================
-
-    private void createGoal() {
-
-        Image img = new Image(
-                getClass().getResourceAsStream("/image/goal.png")
-        );
-
-        goal = new ImageView(img);
-
-        goal.setFitWidth(GameConfig.TILE_SIZE);
-        goal.setFitHeight(GameConfig.TILE_SIZE);
-
-        // 終點位置
-        goal.setLayoutX(4000);
-
-        // 讓終點站在地板上
-        goal.setLayoutY(GameConfig.GROUND_Y - GameConfig.TILE_SIZE);
-
-        world.getChildren().add(goal);
-    }
-
-
 
     // ================= 建立地圖 =================
 
     private void createMap() {
 
-        Image dark = new Image(
-                getClass().getResourceAsStream("/image/grass_dark.png")
-        );
+        Image grass = new Image(getClass().getResourceAsStream("/image/grass.jpg"));
 
-        Image light = new Image(
-                getClass().getResourceAsStream("/image/grass_light.png")
-        );
+        Image stone = new Image(getClass().getResourceAsStream("/image/stone0.png"));
 
         // 產生一直線地板
-        for (int i = 0; i < 80; i++) {
+        // 逐列掃描地圖
+        for (int row = 0; row < map.length; row++) {
+            // 逐行掃描地圖
+            for (int col = 0; col < map[row].length; col++) {
+                // 取得目前格子的代號
+                int tile = map[row][col];
 
-            ImageView block;
+                ImageView block = null;
 
-            // 深淺交錯，方便看出角色與攝影機正在移動
-            if (i % 2 == 0) {
-                block = new ImageView(dark);
+                // ================= 地板 =================
+
+                // 深綠地板
+                if (tile == 1) {
+                    block = new ImageView(grass);
+                }
+
+                // 淺綠地板
+                else if (tile == 2) {
+                    block = new ImageView(stone);
+                }
+
+                // ================= 終點 =================
+
+                else if (tile == 3) {
+                    Image img = new Image(
+                            getClass().getResourceAsStream("/image/goal.png")
+                    );
+
+                    goal = new ImageView(img);
+
+                    goal.setFitWidth(GameConfig.TILE_SIZE);
+
+                    goal.setFitHeight(GameConfig.TILE_SIZE);
+
+                    goal.setLayoutX(col * GameConfig.TILE_SIZE);
+
+                    goal.setLayoutY(row * GameConfig.TILE_SIZE);
+
+                    world.getChildren().add(goal);
+                }
+
+                // ================= 放置地板 =================
+
+                if (block != null) {
+
+                    block.setFitWidth(GameConfig.TILE_SIZE);
+
+                    block.setFitHeight(GameConfig.TILE_SIZE);
+
+                    // col = X 座標
+                    block.setLayoutX(col * GameConfig.TILE_SIZE - 3);
+
+                    // row = Y 座標
+                    block.setLayoutY(row * GameConfig.TILE_SIZE);
+
+                    world.getChildren().add(block);
+                }
             }
-            else {
-                block = new ImageView(light);
-            }
-
-            block.setFitWidth(GameConfig.TILE_SIZE);
-            block.setFitHeight(GameConfig.TILE_SIZE);
-
-            block.setLayoutX(i * GameConfig.TILE_SIZE);
-            block.setLayoutY(GameConfig.GROUND_Y);
-
-            world.getChildren().add(block);
         }
     }
 
@@ -359,6 +366,9 @@ public class Level1Controller {
             @Override
             public void handle(long now) {
 
+                // FPS 限制
+                if (now - lastFrameTime < FRAME_INTERVAL) {return;}
+                lastFrameTime = now;
                 update();
             }
         };
@@ -395,12 +405,12 @@ public class Level1Controller {
         }
 
         // D 鍵向右
-        if (keys.contains(KeyCode.D)) {
+        if (keys.contains(KeyCode.D) && mario.getLayoutX() < map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
             mario.setLayoutX(mario.getLayoutX() + GameConfig.MOVE_SPEED);
         }
 
         // SPACE 跳躍，利用jumpLevel實現長按大跳
-        if (keys.contains(KeyCode.SPACE) && mario.jumpLevel < 10) {
+        if (keys.contains(KeyCode.SPACE) && mario.jumpLevel < 5) {
 
             mario.velocityY = GameConfig.JUMP_POWER;
 
@@ -426,6 +436,7 @@ public class Level1Controller {
         mario.setLayoutY(mario.getLayoutY() + mario.velocityY);
 
         // 地板碰撞判定
+        /*
         if (mario.getLayoutY() >= GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT) {
 
             // 強制站回地板
@@ -443,6 +454,43 @@ public class Level1Controller {
 
             }
         }
+         */
+        // ================= 取得 Mario 腳底所在格子 =================
+// Mario 左腳格子
+        int leftCol = (int)(mario.getLayoutX() / GameConfig.TILE_SIZE);
+// Mario 右腳格子
+        int rightCol = (int)((mario.getLayoutX() + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
+// Mario 腳底格子
+        int bottomRow = (int)((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT) / GameConfig.TILE_SIZE);
+
+// ================= 檢查腳底是否有地板 =================
+
+        boolean onGround = false;
+
+// 防止超出 map 範圍
+        if (bottomRow >= 0
+                && bottomRow < map.length
+                && leftCol >= 0
+                && rightCol < map[0].length) {
+
+            // 左腳或右腳碰到地板
+            if (map[bottomRow][leftCol] == 1 || map[bottomRow][rightCol] == 1) {
+                onGround = true;
+            }
+        }
+
+// ================= 地板碰撞 =================
+        if (onGround && mario.velocityY >= 0) {
+            // 對齊地板頂部
+            mario.setLayoutY(bottomRow * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT);
+
+            mario.velocityY = 0;
+
+            if (mario.jumpLevel > 0) {
+                mario.jumpLevel = 0;
+                playLandingSound();
+            }
+        }
     }
 
 
@@ -452,18 +500,16 @@ public class Level1Controller {
     private void updateCamera() {
 
         // Mario 尚未走到指定位置前，鏡頭不移動
-        if (mario.getLayoutX() > GameConfig.CAMERA_START_X) {
-            cameraX = mario.getLayoutX() - GameConfig.CAMERA_START_X;
-        }
+
 
         //稍微讓Mario 可以左右移動，可用可不用
-        /*
-        if (cameraX < mario.getLayoutX() - 380 && cameraX < 5000) {
+
+        if (cameraX < mario.getLayoutX() - 380 && cameraX < map[0].length*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH -6) {
             cameraX += Math.max((mario.getLayoutX() - 380 - cameraX) * 0.3, 2);
         } else if (cameraX > mario.getLayoutX() - 370 && cameraX > 0) {
             cameraX += Math.min((mario.getLayoutX() - 370 - cameraX) * 0.3, -2);
         }
-        */
+
 
         // 只移動遊戲世界，不移動 root
         world.setLayoutX(-cameraX);
@@ -506,7 +552,6 @@ public class Level1Controller {
 
         // FPS 與設定選單在最上層
         fpsLabel.toFront();
-
         settingPane.toFront();
     }
 }
