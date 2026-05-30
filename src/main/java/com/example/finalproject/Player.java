@@ -10,11 +10,12 @@ public class Player extends ImageView {
     public double maxVelocityY = -GameConfig.JUMP_POWER;
 
     public int jumpLevel = 0;
+    public int mapX = 0;
+    public int mapY = 0;
 
     public Player() {
 
-        Image img =
-                new Image(getClass().getResourceAsStream("/image/menu.jpg"));
+        Image img = new Image(getClass().getResourceAsStream("/image/menu.jpg"));
 
         setImage(img);
 

@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
@@ -249,6 +250,9 @@ public class Level1Controller {
         mario = new Player();
         // 主角起始 X 座標
         mario.setLayoutX(100);
+        // 主角起始 mapX mapY 座標
+        mario.mapX = (int) mario.getLayoutX() / GameConfig.TILE_SIZE;
+        mario.mapY = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
         // 讓角色直接站在地板上
         mario.setLayoutY(GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT);
         world.getChildren().add(mario);
@@ -461,6 +465,10 @@ public class Level1Controller {
 
             playJumpSound();
         }
+
+        // 更新 mapX mapY 座標
+        mario.mapX = (int) mario.getLayoutX() / GameConfig.TILE_SIZE;
+        mario.mapY = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
     }
 
 
@@ -596,5 +604,12 @@ public class Level1Controller {
         // FPS 與設定選單在最上層
         fpsLabel.toFront();
         settingPane.toFront();
+    }
+
+
+    // ================= 圖層順序 =================
+
+    private void collisionCheck() {
+
     }
 }
