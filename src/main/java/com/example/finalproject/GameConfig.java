@@ -31,4 +31,9 @@ public class GameConfig {
     public static final int GROUND = 1;
     public static final int GOAL = 9;
     public static final int STONE = 4;
+    public static final int ENEMY = 8;
+// =============== ENEMY DETAIL =================
+    public static final int ENEMY_WIDTH = 50;
+    public static final int ENEMY_HEIGHT = 50;
+    public static final double ENEMY_SPEED = 2.5;
 }

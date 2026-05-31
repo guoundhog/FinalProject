@@ -17,10 +17,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Level1Controller {
 
@@ -44,8 +41,10 @@ public class Level1Controller {
     private Image stone1;
     private Image stone2;
     private Image stone3;
-    private Image stone4;
 
+
+    private Image enemyImage;
+    private final List<com.example.finalproject.Enemy> enemies = new ArrayList<>();
     // ================= 音效與音樂 =================
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
@@ -93,7 +92,7 @@ public class Level1Controller {
             {0,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0},
+            {0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0},
             {1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
@@ -300,6 +299,9 @@ public class Level1Controller {
         stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
         stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
         stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
+        enemyImage = new Image(getClass().getResourceAsStream("/image/enemy.png"));
+
+
         // 產生一直線地板
         // 逐列掃描地圖
         for (int row = 0; row < map.length; row++) {
@@ -327,7 +329,14 @@ public class Level1Controller {
                 }
 
                 // ================= 終點 =================
-
+                else if (tile == GameConfig.ENEMY) {
+                    com.example.finalproject.Enemy enemy = new com.example.finalproject.Enemy(enemyImage);
+                    enemy.setLayoutX(col * GameConfig.TILE_SIZE);
+                    enemy.setLayoutY((row + 1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT);
+                    enemies.add(enemy);
+                    world.getChildren().add(enemy);
+                    map[row][col] = GameConfig.AIR;
+                }
                 else if (tile == GameConfig.GOAL) {
                     Image img = new Image(getClass().getResourceAsStream("/image/goal.png"));
 
@@ -417,12 +426,13 @@ public class Level1Controller {
     private void update() {
 
         movePlayer();
-
+        moveEnemies();
         applyGravity();
 
         updateCamera();
 
         checkWin();
+        checkEnemyCollision();
         checkDeath();
         updateFPS();
     }
@@ -499,6 +509,52 @@ public class Level1Controller {
         mario.mapY = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
 
 
+    }
+    private void moveEnemies() {
+        for (com.example.finalproject.Enemy enemy : enemies) {
+            enemy.setLayoutX(enemy.getLayoutX() + enemy.velocityX);
+
+            if (enemyHitWall(enemy) || enemyWillFall(enemy)) {
+                enemy.reverseDirection();
+            }
+        }
+    }
+
+    private boolean enemyHitWall(com.example.finalproject.Enemy enemy) {
+        int topRow = (int) (enemy.getLayoutY() / GameConfig.TILE_SIZE);
+        int bottomRow = (int) ((enemy.getLayoutY() + GameConfig.ENEMY_HEIGHT - 1) / GameConfig.TILE_SIZE);
+
+        if (enemy.velocityX > 0) {
+            int rightCol = (int) ((enemy.getLayoutX() + GameConfig.ENEMY_WIDTH) / GameConfig.TILE_SIZE);
+
+            for (int row = topRow; row <= bottomRow; row++) {
+                if (isSolidTile(row, rightCol)) {return true;}
+            }
+        }
+
+        if (enemy.velocityX < 0) {
+            int leftCol = (int) (enemy.getLayoutX() / GameConfig.TILE_SIZE);
+
+            for (int row = topRow; row <= bottomRow; row++) {
+                if (isSolidTile(row, leftCol)) {return true;}
+            }
+        }
+
+        return false;
+    }
+
+    private boolean enemyWillFall(com.example.finalproject.Enemy enemy) {
+        int footRow = (int) ((enemy.getLayoutY() + GameConfig.ENEMY_HEIGHT + 1) / GameConfig.TILE_SIZE);
+        int checkCol;
+
+        if (enemy.velocityX > 0) {
+            checkCol = (int) ((enemy.getLayoutX() + GameConfig.ENEMY_WIDTH + 1) / GameConfig.TILE_SIZE);
+        }
+        else {
+            checkCol = (int) ((enemy.getLayoutX() - 1) / GameConfig.TILE_SIZE);
+        }
+
+        return !isSolidTile(footRow, checkCol);
     }
 
     private void checkHorizontalCollision() {
@@ -722,7 +778,31 @@ public class Level1Controller {
     }
 
     // ================= 終點判定 =================
+    private void checkEnemyCollision() {
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            Enemy enemy = enemies.get(i);
 
+            if (mario.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+                double marioBottom = mario.getLayoutY() + GameConfig.PLAYER_HEIGHT;
+                double enemyTop = enemy.getLayoutY();
+
+                // Mario 正在往下掉，且腳底接近敵人頭頂，代表踩到敵人
+                if (mario.velocityY > 0 && marioBottom - enemyTop < 25) {
+                    world.getChildren().remove(enemy);
+                    enemies.remove(i);
+
+                    // 踩到敵人後讓 Mario 彈起來
+                    mario.velocityY = GameConfig.JUMP_POWER / 1.8;
+
+                    // 防止長按跳躍邏輯干擾踩怪彈跳
+                    mario.jumpLevel = 10;
+                }
+                else {
+                    playerDead();
+                }
+            }
+        }
+    }
     private void checkWin() {
 
         // 主角碰到終點後切換到勝利畫面
