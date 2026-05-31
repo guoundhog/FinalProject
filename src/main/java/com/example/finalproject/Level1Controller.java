@@ -1,5 +1,5 @@
 package com.example.finalproject;
-
+import javafx.scene.control.Button;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -56,7 +56,7 @@ public class Level1Controller {
     private boolean settingOpen = false;
     private AnimationTimer timer;
     private boolean gameFinished = false;
-
+    private int life = 1; // 生命數，目前先設 1，之後可以改成 3
 
     // ================= FPS 顯示 =================
 
@@ -216,12 +216,16 @@ public class Level1Controller {
         });
 
         settingPane = new VBox(15);
+        Button backButton = new Button("Back To Menu");
+        backButton.setOnAction(e -> backToMenu());
+
         settingPane.getChildren().addAll(
                 title,
                 bgmText,
                 bgmSlider,
                 jumpText,
-                jumpSlider
+                jumpSlider,
+                backButton
         );
 
         settingPane.setLayoutX(GameConfig.WINDOW_WIDTH / 2.0 - 150);
@@ -251,8 +255,26 @@ public class Level1Controller {
             Platform.runLater(() -> root.requestFocus());
         }
     }
+    private void backToMenu() {
+        gameFinished = true;
 
+        if (timer != null) {timer.stop();}
+        if (bgmPlayer != null) {bgmPlayer.stop();}
 
+        SceneManager.switchScene("menu.fxml");
+    }
+    private void playerDead() {
+        life--;
+
+        if (life <= -1) {
+            gameFinished = true;
+
+            if (timer != null) {timer.stop();}
+            if (bgmPlayer != null) {bgmPlayer.stop();}
+
+            SceneManager.switchScene("lose.fxml");
+        }
+    }
 
     // ================= 建立主角 =================
 
@@ -401,7 +423,7 @@ public class Level1Controller {
         updateCamera();
 
         checkWin();
-
+        checkDeath();
         updateFPS();
     }
 
@@ -719,7 +741,11 @@ public class Level1Controller {
             SceneManager.switchScene("win.fxml");
         }
     }
-
+    private void checkDeath() {
+        if (mario.getLayoutY() > GameConfig.WINDOW_HEIGHT + 200) {
+            playerDead();
+        }
+    }
     // ================= 圖層順序 =================
 
     private void fixLayerOrder() {
