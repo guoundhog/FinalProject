@@ -57,6 +57,7 @@ public class Level1Controller {
     private AnimationTimer timer;
     private boolean gameFinished = false;
 
+
     // ================= FPS 顯示 =================
 
     private Label fpsLabel;
@@ -330,7 +331,7 @@ public class Level1Controller {
                     block.setFitHeight(GameConfig.TILE_SIZE);
 
                     // col = X 座標
-                    block.setLayoutX(col * GameConfig.TILE_SIZE - 3);
+                    block.setLayoutX(col * GameConfig.TILE_SIZE);
 
                     // row = Y 座標
                     block.setLayoutY(row * GameConfig.TILE_SIZE);
@@ -673,8 +674,8 @@ public class Level1Controller {
             return false;
         }
 
-        // 1、2 代表可碰撞地板
-        return map[row][col] == 1 || map[row][col] == 2;
+        // 代表可碰撞地板
+        return map[row][col] == GameConfig.GROUND || map[row][col] == GameConfig.STONE;
     }
 
 
