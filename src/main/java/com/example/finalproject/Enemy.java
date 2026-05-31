@@ -3,14 +3,17 @@ package com.example.finalproject;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Player extends Entity {
+public class Enemy extends Entity {
 
-    public int jumpLevel;
+    boolean alive = true;
 
-    public Player(double x, double y) {
+    public Enemy(double x, double y) {
         super(x, y, GameConfig.PLAYER_WIDTH, GameConfig.PLAYER_HEIGHT);
 
-        Image img = new Image(getClass().getResourceAsStream("/image/menu.jpg"));
+        velocityX = -2;
+        velocityY = 0;
+
+        Image img = new Image(getClass().getResourceAsStream("/image/mario.jpg"));
         view = new ImageView(img);
         view.setFitWidth(GameConfig.PLAYER_WIDTH);
         view.setFitHeight(GameConfig.PLAYER_HEIGHT);

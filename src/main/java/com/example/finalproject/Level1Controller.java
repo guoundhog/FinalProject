@@ -16,7 +16,9 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Level1Controller {
@@ -31,6 +33,7 @@ public class Level1Controller {
 
     // ================= 遊戲物件 =================
     private Player mario;
+    private List<Enemy> enemies = new ArrayList<>();
     private ImageView goal;
     private ImageView background;
 
@@ -71,15 +74,15 @@ public class Level1Controller {
     // 3 = 終點
 
     private final int[][] map = {
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,2,0,0,0,2,2,2,2,2,0,0,0,2,2,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,3,0,0},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,2,0,0,0,2,2,2,2,2,0,0,0,2,2,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,2},
+            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,3,0,0,2},
+            {2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2}
     };
 
     // ================= 初始化 =================
@@ -87,6 +90,7 @@ public class Level1Controller {
         createBackground();
         createMap();
         createPlayer();
+        createEnemy();
         createFPSCounter();
         setupMusic();
         createSettingPane();
@@ -232,13 +236,19 @@ public class Level1Controller {
 
     // ================= 建立主角 =================
     private void createPlayer() {
-        mario = new Player();
-        // 主角起始 X 座標
-        mario.setLayoutX(100);
-        // 讓角色直接站在地板上
-        mario.setLayoutY(GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT);
+        // 主角起始 X 座標，讓角色直接站在地板上
+        mario = new Player(100, GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT);
 
-        world.getChildren().add(mario);
+        world.getChildren().add(mario.view);
+    }
+
+    // ================= 建立敵人 =================
+    private void createEnemy() {
+        // 主角起始 X 座標，讓角色直接站在地板上
+        Enemy enemy = new Enemy(960, 448);
+        enemies.add(enemy);
+
+        world.getChildren().add(enemy.view);
     }
 
     // ================= 建立地圖 =================
@@ -251,7 +261,7 @@ public class Level1Controller {
         // 逐列掃描地圖
         for (int row = 0; row < map.length; row++) {
             // 逐行掃描地圖
-            for (int col = 0; col < map[row].length; col++) {
+            for (int col = 1; col < map[row].length - 1; col++) {
                 // 取得目前格子的代號
                 int tile = map[row][col];
 
@@ -287,7 +297,7 @@ public class Level1Controller {
                     block.setFitWidth(GameConfig.TILE_SIZE);
                     block.setFitHeight(GameConfig.TILE_SIZE);
                     // col = X 座標
-                    block.setLayoutX(col * GameConfig.TILE_SIZE - 3);
+                    block.setLayoutX((col - 1) * GameConfig.TILE_SIZE - 3);
                     // row = Y 座標
                     block.setLayoutY(row * GameConfig.TILE_SIZE);
 
@@ -346,26 +356,31 @@ public class Level1Controller {
 
     // ================= 每幀更新 =================
     private void update() {
-        movePlayerHorizontal();
-        handleXCollision();
-        movePlayerVertical();
-        handleYCollision();
+        handleInput();
+        updateEntity(mario);
+        for (Entity e : enemies){
+            updateEntity(e);
+        }
         updateCamera();
+        mario.render();
+        for (Entity e : enemies){
+            e.render();
+        }
         checkWin();
         updateFPS();
     }
 
 
 
-    // ================= 玩家移動 =================
-    private void movePlayerHorizontal() {
+    // ================= 讀取鍵盤輸入 =================
+    private void handleInput() {
         // A 鍵向左加速，Mario 不會超出左邊界
-        if (keys.contains(KeyCode.A) && mario.getLayoutX() > 3) {
+        if (keys.contains(KeyCode.A) && mario.x > 3) {
             mario.velocityX -= GameConfig.ACCELERATION;
         }
 
         // D 鍵向右加速，Mario 不會超出地圖右邊界
-        if (keys.contains(KeyCode.D) && mario.getLayoutX() < map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
+        if (keys.contains(KeyCode.D) && mario.x < map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
             mario.velocityX += GameConfig.ACCELERATION;
         }
 
@@ -389,32 +404,6 @@ public class Level1Controller {
             }
         }
 
-        // 限制最大水平速度
-        if (mario.velocityX > GameConfig.maxVelocityX) {
-            mario.velocityX = GameConfig.maxVelocityX;
-        }
-
-        if (mario.velocityX < -GameConfig.maxVelocityX) {
-            mario.velocityX = -GameConfig.maxVelocityX;
-        }
-
-        // 套用水平速度
-        mario.setLayoutX(mario.getLayoutX() + mario.velocityX);
-
-        // 左邊界限制
-        if (mario.getLayoutX() < 3) {
-            mario.setLayoutX(3);
-            mario.velocityX = 0;
-        }
-
-        // 右邊界限制
-        if (mario.getLayoutX() > map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
-            mario.setLayoutX(map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3);
-            mario.velocityX = 0;
-        }
-    }
-
-    private void movePlayerVertical() {
         // SPACE 跳躍，利用 jumpLevel 實現長按大跳
         if (keys.contains(KeyCode.SPACE) && (mario.onGround || (mario.jumpLevel > 0 && mario.jumpLevel < 4))) {
             if (mario.jumpLevel == 0){
@@ -424,22 +413,45 @@ public class Level1Controller {
             mario.jumpLevel++;
             mario.onGround = false;
         }
-
-        // 套用速度
-        mario.setLayoutY(mario.getLayoutY() + mario.velocityY);
-        applyGravity();
     }
 
+    // ================= Entity移動 =================
+    private void updateEntity(Entity entity) {
+        moveX(entity);
+        moveY(entity);
+    }
 
+    private void moveX(Entity entity) {
+        // 限制最大水平速度
+        if (entity.velocityX > GameConfig.maxVelocityX) {
+            entity.velocityX = GameConfig.maxVelocityX;
+        }
 
-    // ================= 重力系統 =================
-    private void applyGravity() {
+        if (entity.velocityX < -GameConfig.maxVelocityX) {
+            entity.velocityX = -GameConfig.maxVelocityX;
+        }
+
+        // 套用水平速度
+        entity.x += entity.velocityX;
+
+        // 方塊碰撞檢測
+        handleXCollision(entity);
+    }
+
+    private void moveY(Entity entity) {
+        // 套用速度
+        entity.y += entity.velocityY;
         // 持續增加向下速度，達到一定程度時停止加速
         //速度上限之後要整活後可以移除
-        if (mario.velocityY < GameConfig.maxVelocityY) {
-            mario.velocityY += GameConfig.GRAVITY;
+        if (entity.velocityY < GameConfig.maxVelocityY) {
+            entity.velocityY += GameConfig.GRAVITY;
         }
+
+        // 方塊碰撞檢測
+        handleYCollision(entity);
     }
+
+
 
     // ================= 碰撞檢測 =================
     private boolean isSolid(int tileX, int tileY) {
@@ -450,46 +462,60 @@ public class Level1Controller {
         return (map[tileY][tileX] == 1) || (map[tileY][tileX] == 2);
     }
 
-    private void handleXCollision() {
+    private void handleXCollision(Entity entity) {
         // 更新 mapX mapY 座標
-        mario.left = (int) (mario.getLayoutX() / GameConfig.TILE_SIZE);
-        mario.right = (int) ((mario.getLayoutX() + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
-        mario.top = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
-        mario.bottom = (int)((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
+        int left = (int) (entity.x / GameConfig.TILE_SIZE);
+        int right = (int) ((entity.x + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
+        int top = (int) (entity.y / GameConfig.TILE_SIZE);
+        int bottom = (int)((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
         //遍歷周圍格子
-        for (int ty = mario.top; ty <= mario.bottom; ty++){
-            if (isSolid(mario.left, ty) && mario.velocityX < 0){
-                mario.setLayoutX((mario.left + 1) * GameConfig.TILE_SIZE);
-                mario.velocityX = 0;
-            }else if (isSolid(mario.right, ty) && mario.velocityX > 0) {
-                mario.setLayoutX(mario.right * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH);
-                mario.velocityX = 0;
+        for (int ty = top; ty <= bottom; ty++){
+            if (isSolid(left, ty) && entity.velocityX < 0){
+                entity.x = (left + 1) * GameConfig.TILE_SIZE;
+                if (entity instanceof Enemy enemy){
+                    enemy.velocityX *= -1;
+                }else {
+                    entity.velocityX = 0;
+                }
+            }else if (isSolid(right, ty) && entity.velocityX > 0) {
+                entity.x = right * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH;
+                if (entity instanceof Enemy enemy){
+                    enemy.velocityX *= -1;
+                }else {
+                    entity.velocityX = 0;
+                }
             }
         }
     }
 
-    private void handleYCollision() {
+    private void handleYCollision(Entity entity) {
         // 更新 mapX mapY 座標
-        mario.left = (int) (mario.getLayoutX() / GameConfig.TILE_SIZE);
-        mario.right = (int) ((mario.getLayoutX() + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
-        mario.top = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
-        mario.bottom = (int)((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
+        int left = (int) (entity.x / GameConfig.TILE_SIZE);
+        int right = (int) ((entity.x + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
+        int top = (int) (entity.y / GameConfig.TILE_SIZE);
+        int bottom = (int)((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
         // 避免空中跳躍，可刪
-        mario.onGround = false;
+        if (entity instanceof Player player){
+            player.onGround = false;
+        }
 
         //遍歷周圍格子
-        for (int tx = mario.left; tx <= mario.right; tx++){
-            if (isSolid(tx, mario.top) && mario.velocityY < 0){
-                mario.setLayoutY((mario.top+ 1) * GameConfig.TILE_SIZE);
-                mario.velocityY = 0;
-                mario.jumpLevel = 4;
-            }else if (isSolid(tx, mario.bottom) && mario.velocityY > 0){
-                mario.setLayoutY(mario.bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT);
-                mario.velocityY = 0;
-                mario.jumpLevel = 0;
-                mario.onGround = true;
+        for (int tx = left; tx <= right; tx++){
+            if (isSolid(tx, top) && entity.velocityY < 0){
+                entity.y = (top + 1) * GameConfig.TILE_SIZE;
+                entity.velocityY = 0;
+                if (entity instanceof Player player){
+                    player.jumpLevel = 4;
+                }
+            }else if (isSolid(tx, bottom) && entity.velocityY > 0){
+                entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
+                entity.velocityY = 0;
+                if (entity instanceof Player player){
+                    player.jumpLevel = 0;
+                }
+                entity.onGround = true;
                 playLandingSound();
             }
         }
@@ -501,10 +527,10 @@ public class Level1Controller {
         // Mario 尚未走到指定位置前，鏡頭不移動
 
         //稍微讓Mario 可以左右移動，可用可不用
-        if (cameraX < mario.getLayoutX() - 380 && cameraX < map[0].length*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH -6) {
-            cameraX += Math.max((mario.getLayoutX() - 380 - cameraX) * 0.3, 2);
-        } else if (cameraX > mario.getLayoutX() - 370 && cameraX > 0) {
-            cameraX += Math.min((mario.getLayoutX() - 370 - cameraX) * 0.3, -2);
+        if (cameraX < mario.x - 380 && cameraX < map[0].length*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH -6) {
+            cameraX += Math.max((mario.x - 380 - cameraX) * 0.3, 2);
+        } else if (cameraX > mario.x - 370 && cameraX > 0) {
+            cameraX += Math.min((mario.x - 370 - cameraX) * 0.3, -2);
         }
 
         // 只移動遊戲世界，不移動 root
@@ -516,7 +542,7 @@ public class Level1Controller {
     // ================= 終點判定 =================
     private void checkWin() {
         // 主角碰到終點後切換到勝利畫面
-        if (!gameFinished && mario.getBoundsInParent().intersects(goal.getBoundsInParent())) {
+        if (!gameFinished && mario.view.getBoundsInParent().intersects(goal.getBoundsInParent())) {
             gameFinished = true;
 
             if (timer != null) {
