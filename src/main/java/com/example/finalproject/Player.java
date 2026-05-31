@@ -7,11 +7,14 @@ public class Player extends ImageView {
 
     public double velocityY = 0;
     public double velocityX = 0;
-    public double maxVelocityY = -GameConfig.JUMP_POWER;
 
-    public int jumpLevel = 0;
-    public int mapX = 0;
-    public int mapY = 0;
+    public int jumpLevel;
+    public int left;
+    public int right;
+    public int top;
+    public int bottom;
+
+    public boolean onGround;
 
     public Player() {
 
@@ -19,7 +22,7 @@ public class Player extends ImageView {
 
         setImage(img);
 
-        setFitWidth(50);
-        setFitHeight(50);
+        setFitWidth(GameConfig.PLAYER_WIDTH);
+        setFitHeight(GameConfig.PLAYER_HEIGHT);
     }
 }
