@@ -19,10 +19,16 @@ public class GameConfig {
     public static final double FRICTION = 2; // 摩擦力，越大停下越快
     public static final double MAX_MOVE_SPEED = 420; // 最大水平速度
     // 物理
-    public static final double GRAVITY = 5;
+    public static final double GRAVITY = 5.3;
     public static final double MOVE_SPEED = 10.5;
     public static final double JUMP_POWER = -40.7;
 
     // 攝影機
     public static final int CAMERA_START_X = (int) (WINDOW_WIDTH*0.3);
+// ================= Tile ID =================
+
+    public static final int AIR = 0;
+    public static final int GROUND = 1;
+    public static final int GOAL = 9;
+    public static final int STONE = 4;
 }
