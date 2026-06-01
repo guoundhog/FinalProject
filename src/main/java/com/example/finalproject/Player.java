@@ -10,7 +10,7 @@ public class Player extends Entity {
     public Player(double x, double y) {
         super(x, y, GameConfig.PLAYER_WIDTH, GameConfig.PLAYER_HEIGHT);
 
-        Image img = new Image(getClass().getResourceAsStream("/image/menu.jpg"));
+        Image img = new Image(getClass().getResourceAsStream("/image/actor.png"));
         view = new ImageView(img);
         view.setFitWidth(GameConfig.PLAYER_WIDTH);
         view.setFitHeight(GameConfig.PLAYER_HEIGHT);

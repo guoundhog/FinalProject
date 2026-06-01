@@ -36,7 +36,7 @@ public class Level1Controller {
 
     // ================= 遊戲物件 =================
     private Player mario;
-    private List<Enemy> enemies = new ArrayList<>();
+    private final List<Enemy> enemies = new ArrayList<>();
     private ImageView goal;
     private final Map<String, ImageView> breakableBlocks = new HashMap<>();
     private final Map<String, Integer> breakableBlockHp = new HashMap<>();
@@ -50,9 +50,6 @@ public class Level1Controller {
     private Image specialBlockImage;
     private Image bridgeImage;
 
-
-    private Image enemyImage;
-    private final List<com.example.finalproject.Enemy> enemies = new ArrayList<>();
     // ================= 音效與音樂 =================
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
@@ -97,7 +94,7 @@ public class Level1Controller {
             {0,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0},
+            {0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0},
             {1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
@@ -106,7 +103,6 @@ public class Level1Controller {
         createBackground();
         createMap();
         createPlayer();
-        createEnemy();
         createFPSCounter();
         setupMusic();
         createSettingPane();
@@ -174,6 +170,7 @@ public class Level1Controller {
         // FPS 加到 root，才不會跟著地圖移動
         root.getChildren().add(fpsLabel);
     }
+
     private void updateFPS() {
         frames++;
         long now = System.nanoTime();
@@ -250,6 +247,7 @@ public class Level1Controller {
             Platform.runLater(() -> root.requestFocus());
         }
     }
+
     private void backToMenu() {
         gameFinished = true;
 
@@ -258,6 +256,7 @@ public class Level1Controller {
 
         SceneManager.switchScene("menu.fxml");
     }
+
     private void playerDead() {
         life--;
 
@@ -280,11 +279,9 @@ public class Level1Controller {
     }
 
     // ================= 建立敵人 =================
-    private void createEnemy() {
-        // 主角起始 X 座標，讓角色直接站在地板上
-        Enemy enemy = new Enemy(960, 448);
+    private void createEnemy(double x, double y) {
+        Enemy enemy = new Enemy(x, y);
         enemies.add(enemy);
-
         world.getChildren().add(enemy.view);
     }
 
@@ -296,7 +293,6 @@ public class Level1Controller {
         stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
         stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
         stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
-        enemyImage = new Image(getClass().getResourceAsStream("/image/enemy.png"));
         hardBlockImage = new Image(getClass().getResourceAsStream("/image/grass_dark.png"));
         specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
         bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
@@ -305,7 +301,7 @@ public class Level1Controller {
         // 逐列掃描地圖
         for (int row = 0; row < map.length; row++) {
             // 逐行掃描地圖
-            for (int col = 1; col < map[row].length - 1; col++) {
+            for (int col = 0; col < map[row].length; col++) {
                 // 取得目前格子的代號
                 int tile = map[row][col];
 
@@ -337,14 +333,10 @@ public class Level1Controller {
                 else if (tile == GameConfig.BRIDGE) {
                     block = new ImageView(bridgeImage);
                 }
-
-                // ================= 終點 =================
                 else if (tile == GameConfig.ENEMY) {
-                    com.example.finalproject.Enemy enemy = new com.example.finalproject.Enemy(enemyImage);
-                    enemy.setLayoutX(col * GameConfig.TILE_SIZE);
-                    enemy.setLayoutY((row + 1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT);
-                    enemies.add(enemy);
-                    world.getChildren().add(enemy);
+                    createEnemy(col * GameConfig.TILE_SIZE, (row+1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT) ;
+//                    createEnemy(col * GameConfig.TILE_SIZE, (row) * GameConfig.TILE_SIZE-50);
+//                    System.out.println("enemy created at " + col * GameConfig.TILE_SIZE + ", " + ( (row) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT));
                     map[row][col] = GameConfig.AIR;
                 }
                 else if (tile == GameConfig.GOAL) {
@@ -427,11 +419,11 @@ public class Level1Controller {
         for (Entity e : enemies){
             e.render();
         }
+        checkEnemyCollision();
         checkWin();
+        checkDeath();
         updateFPS();
     }
-
-
 
     // ================= 讀取鍵盤輸入 =================
     private void handleInput() {
@@ -480,143 +472,9 @@ public class Level1Controller {
     private void updateEntity(Entity entity) {
         moveX(entity);
         moveY(entity);
-        // 更新 mapX mapY 座標
-        mario.mapX = (int) mario.getLayoutX() / GameConfig.TILE_SIZE;
-        mario.mapY = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
-
-
-    }
-    private void moveEnemies() {
-        for (com.example.finalproject.Enemy enemy : enemies) {
-            enemy.setLayoutX(enemy.getLayoutX() + enemy.velocityX);
-
-            if (enemyHitWall(enemy) || enemyWillFall(enemy)) {
-                enemy.reverseDirection();
-            }
-        }
     }
 
-    private boolean enemyHitWall(com.example.finalproject.Enemy enemy) {
-        int topRow = (int) (enemy.getLayoutY() / GameConfig.TILE_SIZE);
-        int bottomRow = (int) ((enemy.getLayoutY() + GameConfig.ENEMY_HEIGHT - 1) / GameConfig.TILE_SIZE);
-
-        if (enemy.velocityX > 0) {
-            int rightCol = (int) ((enemy.getLayoutX() + GameConfig.ENEMY_WIDTH) / GameConfig.TILE_SIZE);
-
-            for (int row = topRow; row <= bottomRow; row++) {
-                if (isSolidTile(row, rightCol)) {return true;}
-            }
-        }
-
-        if (enemy.velocityX < 0) {
-            int leftCol = (int) (enemy.getLayoutX() / GameConfig.TILE_SIZE);
-
-            for (int row = topRow; row <= bottomRow; row++) {
-                if (isSolidTile(row, leftCol)) {return true;}
-            }
-        }
-
-        return false;
-    }
-
-    private boolean enemyWillFall(com.example.finalproject.Enemy enemy) {
-        int footRow = (int) ((enemy.getLayoutY() + GameConfig.ENEMY_HEIGHT + 1) / GameConfig.TILE_SIZE);
-        int checkCol;
-
-        if (enemy.velocityX > 0) {
-            checkCol = (int) ((enemy.getLayoutX() + GameConfig.ENEMY_WIDTH + 1) / GameConfig.TILE_SIZE);
-        }
-        else {
-            checkCol = (int) ((enemy.getLayoutX() - 1) / GameConfig.TILE_SIZE);
-        }
-
-        return !isSolidTile(footRow, checkCol);
-    }
-
-    private void checkHorizontalCollision() {
-
-        int topRow = (int) (mario.getLayoutY() / GameConfig.TILE_SIZE);
-
-        int bottomRow = (int) ((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
-
-        if (mario.velocityX > 0) {
-
-            int rightCol = (int) ((mario.getLayoutX() + GameConfig.PLAYER_WIDTH) / GameConfig.TILE_SIZE);
-
-            for (int row = topRow; row <= bottomRow; row++) {
-
-                if (isSolidTile(row, rightCol)) {
-
-                    mario.setLayoutX(rightCol * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH);
-                    mario.velocityX = 0;
-                    break;
-                }
-            }
-        }
-
-        if (mario.velocityX < 0) {
-
-            int leftCol = (int) (mario.getLayoutX() / GameConfig.TILE_SIZE);
-
-            for (int row = topRow; row <= bottomRow; row++) {
-
-                if (isSolidTile(row, leftCol)) {
-                    mario.setLayoutX((leftCol + 1) * GameConfig.TILE_SIZE);
-                    mario.velocityX = 0;
-                    break;
-                }
-            }
-        }
-    }
-
-    private void checkVerticalCollision() {
-
-        int leftCol = (int) (mario.getLayoutX() / GameConfig.TILE_SIZE);
-
-        int rightCol = (int) ((mario.getLayoutX() + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
-
-        if (mario.velocityY > 0) {
-
-            int bottomRow = (int) ((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT) / GameConfig.TILE_SIZE);
-
-            for (int col = leftCol; col <= rightCol; col++) {
-
-                if (isSolidTile(bottomRow, col) || map[bottomRow][col] == GameConfig.BRIDGE) {
-                    mario.setLayoutY(bottomRow * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT);
-
-                    mario.velocityY = 0;
-
-                    if (mario.jumpLevel > 0) {
-                        mario.jumpLevel = 0;
-                        playLandingSound();
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        if (mario.velocityY < 0) {
-
-            int topRow = (int) (mario.getLayoutY() / GameConfig.TILE_SIZE);
-
-            for (int col = leftCol; col <= rightCol; col++) {
-
-                if (isSolidTile(topRow, col)) {
-
-                    mario.setLayoutY((topRow + 1) * GameConfig.TILE_SIZE);
-
-                    mario.velocityY = -mario.velocityY;
-
-                    hitBlockFromBelow(topRow, col);
-
-                    break;
-                }
-            }
-        }
-    }
     private void hitBlockFromBelow(int row, int col) {
-
         if (map[row][col] == GameConfig.HARD_BLOCK) {
             mario.velocityY = -mario.velocityY;
             return;
@@ -661,15 +519,10 @@ public class Level1Controller {
 
         breakableBlockHp.put(key, hp);
     }
+
     private void playBlockHitAnimation(int row, int col) {
         String key = row + "," + col;
         ImageView block = breakableBlocks.get(key);
-
-    private void moveX(Entity entity) {
-        // 限制最大水平速度
-        if (entity.velocityX > GameConfig.maxVelocityX) {
-            entity.velocityX = GameConfig.maxVelocityX;
-        }
         if (block == null) {return;}
 
         TranslateTransition up = new TranslateTransition(Duration.millis(70), block);
@@ -690,6 +543,7 @@ public class Level1Controller {
         item.setLayoutY((row - 1) * GameConfig.TILE_SIZE);
         world.getChildren().add(item);
     }
+
     private void removeBlockAt(int row, int col) {
         String key = row + "," + col;
         ImageView block = breakableBlocks.get(key);
@@ -700,6 +554,13 @@ public class Level1Controller {
             breakableBlockHp.remove(key);
         }
     }
+
+
+    private void moveX(Entity entity) {
+        // 限制最大水平速度
+        if (entity.velocityX > GameConfig.maxVelocityX) {
+            entity.velocityX = GameConfig.maxVelocityX;
+        }
 
         if (entity.velocityX < -GameConfig.maxVelocityX) {
             entity.velocityX = -GameConfig.maxVelocityX;
@@ -728,12 +589,16 @@ public class Level1Controller {
 
 
     // ================= 碰撞檢測 =================
-    private boolean isSolid(int tileX, int tileY) {
-        if (tileX < 0 || tileY < 0 || tileX >= map[0].length || tileY >= map.length){
+    private boolean isSolidTile(int col, int row) {
+        // 超出地圖範圍就當成不能碰撞
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
             return false;
         }
-
-        return (map[tileY][tileX] == 1) || (map[tileY][tileX] == 2);
+        // 代表可碰撞地板
+        return map[row][col] == GameConfig.GROUND
+                || map[row][col] == GameConfig.STONE
+                || map[row][col] == GameConfig.HARD_BLOCK
+                || map[row][col] == GameConfig.SPECIAL_BLOCK;
     }
 
     private void handleXCollision(Entity entity) {
@@ -745,14 +610,14 @@ public class Level1Controller {
 
         //遍歷周圍格子
         for (int ty = top; ty <= bottom; ty++){
-            if (isSolid(left, ty) && entity.velocityX < 0){
+            if (isSolidTile(left, ty) && entity.velocityX < 0){
                 entity.x = (left + 1) * GameConfig.TILE_SIZE;
                 if (entity instanceof Enemy enemy){
                     enemy.velocityX *= -1;
                 }else {
                     entity.velocityX = 0;
                 }
-            }else if (isSolid(right, ty) && entity.velocityX > 0) {
+            }else if (isSolidTile(right, ty) && entity.velocityX > 0) {
                 entity.x = right * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH;
                 if (entity instanceof Enemy enemy){
                     enemy.velocityX *= -1;
@@ -771,19 +636,19 @@ public class Level1Controller {
         int bottom = (int)((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
         // 避免空中跳躍，可刪
-        if (entity instanceof Player player){
-            player.onGround = false;
-        }
+        entity.onGround = false;
+
 
         //遍歷周圍格子
         for (int tx = left; tx <= right; tx++){
-            if (isSolid(tx, top) && entity.velocityY < 0){
+            if (isSolidTile(tx, top) && entity.velocityY < 0){
                 entity.y = (top + 1) * GameConfig.TILE_SIZE;
                 entity.velocityY = 0;
                 if (entity instanceof Player player){
                     player.jumpLevel = 4;
+                    hitBlockFromBelow(top, tx);
                 }
-            }else if (isSolid(tx, bottom) && entity.velocityY > 0){
+            }else if (isSolidTile(tx, bottom) && entity.velocityY > 0){
                 entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
                 entity.velocityY = 0;
                 if (entity instanceof Player player){
@@ -793,19 +658,6 @@ public class Level1Controller {
                 playLandingSound();
             }
         }
-    }
-    private boolean isSolidTile(int row, int col) {
-
-        // 超出地圖範圍就當成不能碰撞
-        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
-            return false;
-        }
-
-        // 代表可碰撞地板
-        return map[row][col] == GameConfig.GROUND
-                || map[row][col] == GameConfig.STONE
-                || map[row][col] == GameConfig.HARD_BLOCK
-                || map[row][col] == GameConfig.SPECIAL_BLOCK;
     }
 
     // ================= 攝影機系統 =================
@@ -828,12 +680,12 @@ public class Level1Controller {
         for (int i = enemies.size() - 1; i >= 0; i--) {
             Enemy enemy = enemies.get(i);
 
-            if (mario.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
-                double marioBottom = mario.getLayoutY() + GameConfig.PLAYER_HEIGHT;
-                double enemyTop = enemy.getLayoutY();
+            if (mario.view.getBoundsInParent().intersects(enemy.view.getBoundsInParent())) {
+                double marioBottom = mario.y + GameConfig.PLAYER_HEIGHT;
+                double enemyTop = enemy.y;
 
                 // Mario 正在往下掉，且腳底接近敵人頭頂，代表踩到敵人
-                if (mario.velocityY > 0 && marioBottom - enemyTop < 25) {
+                if (mario.velocityY > 0 && marioBottom - enemyTop > 0) {
                     playEnemyDeathAnimation(enemy);
                     enemies.remove(i);
                     mario.velocityY = GameConfig.JUMP_POWER / 1.8;
@@ -847,20 +699,20 @@ public class Level1Controller {
     }
 
     private void playEnemyDeathAnimation(Enemy enemy) {
-        ScaleTransition grow = new ScaleTransition(Duration.millis(80), enemy);
+        ScaleTransition grow = new ScaleTransition(Duration.millis(80), enemy.view);
         grow.setToX(1.4);
         grow.setToY(1.4);
 
-        ScaleTransition shrink = new ScaleTransition(Duration.millis(160), enemy);
+        ScaleTransition shrink = new ScaleTransition(Duration.millis(160), enemy.view);
         shrink.setToX(0);
         shrink.setToY(0);
 
-        FadeTransition fade = new FadeTransition(Duration.millis(160), enemy);
+        FadeTransition fade = new FadeTransition(Duration.millis(160), enemy.view);
         fade.setToValue(0);
 
         grow.setOnFinished(e -> {
             ParallelTransition disappear = new ParallelTransition(shrink, fade);
-            disappear.setOnFinished(event -> world.getChildren().remove(enemy));
+            disappear.setOnFinished(event -> world.getChildren().remove(enemy.view));
             disappear.play();
         });
 
@@ -888,16 +740,16 @@ public class Level1Controller {
         if (timer != null) {timer.stop();}
         if (bgmPlayer != null) {bgmPlayer.stop();}
 
-        RotateTransition rotate = new RotateTransition(Duration.millis(700), mario);
+        RotateTransition rotate = new RotateTransition(Duration.millis(700), mario.view);
         rotate.setByAngle(720);
 
-        ScaleTransition scale = new ScaleTransition(Duration.millis(700), mario);
+        ScaleTransition scale = new ScaleTransition(Duration.millis(700), mario.view);
         scale.setToX(0);
         scale.setToY(0);
 
-        TranslateTransition move = new TranslateTransition(Duration.millis(700), mario);
-        move.setToX(goal.getLayoutX() - mario.getLayoutX());
-        move.setToY(goal.getLayoutY() - mario.getLayoutY());
+        TranslateTransition move = new TranslateTransition(Duration.millis(700), mario.view);
+        move.setToX(goal.getLayoutX() - mario.x);
+        move.setToY(goal.getLayoutY() - mario.y);
 
         ParallelTransition animation = new ParallelTransition(rotate, scale, move);
 
@@ -907,7 +759,7 @@ public class Level1Controller {
     }
 
     private void checkDeath() {
-        if (mario.getLayoutY() > GameConfig.WINDOW_HEIGHT + 200) {
+        if (mario.y > GameConfig.WINDOW_HEIGHT + 200) {
             playerDead();
         }
     }

@@ -9,7 +9,7 @@ public class Entity {
 
     double velocityX, velocityY;
 
-    boolean onGround;
+    boolean onGround = true;
 
     ImageView view;
 
