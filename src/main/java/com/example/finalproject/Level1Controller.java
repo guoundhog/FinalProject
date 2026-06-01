@@ -460,11 +460,11 @@ public class Level1Controller {
         // SPACE 跳躍，利用 jumpLevel 實現長按大跳
         if (keys.contains(KeyCode.SPACE) && (mario.onGround || (mario.jumpLevel > 0 && mario.jumpLevel < 4))) {
             if (mario.jumpLevel == 0){
+                mario.onGround = false;
                 playJumpSound();
             }
             mario.velocityY = GameConfig.JUMP_POWER;
             mario.jumpLevel++;
-            mario.onGround = false;
         }
     }
 
@@ -603,7 +603,7 @@ public class Level1Controller {
         int left = (int) (entity.x / GameConfig.TILE_SIZE);
         int right = (int) ((entity.x + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
         int top = (int) (entity.y / GameConfig.TILE_SIZE);
-        int bottom = (int)((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
+        int bottom = (int) ((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
         //遍歷周圍格子
         for (int ty = top; ty <= bottom; ty++){
@@ -631,11 +631,6 @@ public class Level1Controller {
         int top = (int) (entity.y / GameConfig.TILE_SIZE);
         int bottom = (int) ((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
-        boolean wasOnGround = entity.onGround;
-
-        // 先假設這幀沒有落地
-        entity.onGround = false;
-//        System.out.println(entity.);
         // 往上撞
         if (entity.velocityY < 0) {
 
@@ -660,27 +655,31 @@ public class Level1Controller {
 
         // 往下落
         else if (entity.velocityY > 0) {
-            if (entity instanceof Player player) {System.out.println("mario velo"+ player.velocityY);}
             if (isSolidTile(left, bottom) || isSolidTile(right, bottom)) {
 
                 entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
                 entity.velocityY = 0;
-                entity.onGround = true;
 
                 if (entity instanceof Player player) {
-
                     player.jumpLevel = 0;
-                    System.out.println("!wasonground"+!wasOnGround);
+                    //System.out.println("!wasonground"+!wasOnGround);
                     // 只有真正落地瞬間播放一次
-                    if (!wasOnGround) {
-                        player.onGround = true;
+                    if (!player.onGround) {
                         playLandingSound();
                     }
                 }
+                entity.onGround = true;
+            }
+            else {
+                entity.onGround = false;
             }
         }
-        else{
-            entity.onGround = true;
+
+        else {
+            if (!(isSolidTile(left, bottom + 1) || isSolidTile(right, bottom + 1))) {
+                //System.out.println(2);
+                entity.onGround = false;
+            }
         }
     }
 
