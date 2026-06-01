@@ -21,7 +21,7 @@ public class GameConfig {
     public static final double maxVelocityY = -GameConfig.JUMP_POWER; // 最大垂直速度
     // 物理
     public static final double GRAVITY = 5.3;
-    public static final double MOVE_SPEED = 10.5;
+//    public static final double MOVE_SPEED = 10.5;
     public static final double JUMP_POWER = -40.7;
 
     // 攝影機

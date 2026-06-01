@@ -71,7 +71,7 @@ public class Level1Controller {
     private final Set<KeyCode> keys = new HashSet<>();
 
     // ================= 攝影機 =================
-    private double cameraX = 0;
+    private double cameraX = GameConfig.TILE_SIZE;
 
     // ================= FPS 限制 =================
     // 40 FPS = 1 秒 40 幀
@@ -87,15 +87,15 @@ public class Level1Controller {
 // 9 = 終點
 
     private final int[][] map = {
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,5}
     };
 
     // ================= 初始化 =================
@@ -293,7 +293,7 @@ public class Level1Controller {
         stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
         stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
         stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
-        hardBlockImage = new Image(getClass().getResourceAsStream("/image/grass_dark.png"));
+        hardBlockImage = new Image(getClass().getResourceAsStream("/image/stone0.png"));
         specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
         bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
 
@@ -428,12 +428,12 @@ public class Level1Controller {
     // ================= 讀取鍵盤輸入 =================
     private void handleInput() {
         // A 鍵向左加速，Mario 不會超出左邊界
-        if (keys.contains(KeyCode.A) && mario.x > 3) {
+        if (keys.contains(KeyCode.A)) {
             mario.velocityX -= GameConfig.ACCELERATION;
         }
 
         // D 鍵向右加速，Mario 不會超出地圖右邊界
-        if (keys.contains(KeyCode.D) && mario.x < map[0].length * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH - 3) {
+        if (keys.contains(KeyCode.D)){
             mario.velocityX += GameConfig.ACCELERATION;
         }
 
@@ -555,7 +555,6 @@ public class Level1Controller {
         }
     }
 
-
     private void moveX(Entity entity) {
         // 限制最大水平速度
         if (entity.velocityX > GameConfig.maxVelocityX) {
@@ -578,15 +577,13 @@ public class Level1Controller {
         entity.y += entity.velocityY;
         // 持續增加向下速度，達到一定程度時停止加速
         //速度上限之後要整活後可以移除
-        if (entity.velocityY < GameConfig.maxVelocityY) {
+        if (!entity.onGround && entity.velocityY < GameConfig.maxVelocityY) {
             entity.velocityY += GameConfig.GRAVITY;
         }
 
         // 方塊碰撞檢測
         handleYCollision(entity);
     }
-
-
 
     // ================= 碰撞檢測 =================
     private boolean isSolidTile(int col, int row) {
@@ -629,34 +626,61 @@ public class Level1Controller {
     }
 
     private void handleYCollision(Entity entity) {
-        // 更新 mapX mapY 座標
         int left = (int) (entity.x / GameConfig.TILE_SIZE);
         int right = (int) ((entity.x + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
         int top = (int) (entity.y / GameConfig.TILE_SIZE);
-        int bottom = (int)((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
+        int bottom = (int) ((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
-        // 避免空中跳躍，可刪
+        boolean wasOnGround = entity.onGround;
+
+        // 先假設這幀沒有落地
         entity.onGround = false;
+//        System.out.println(entity.);
+        // 往上撞
+        if (entity.velocityY < 0) {
 
+            if (isSolidTile(left, top) || isSolidTile(right, top)) {
 
-        //遍歷周圍格子
-        for (int tx = left; tx <= right; tx++){
-            if (isSolidTile(tx, top) && entity.velocityY < 0){
                 entity.y = (top + 1) * GameConfig.TILE_SIZE;
                 entity.velocityY = 0;
-                if (entity instanceof Player player){
+
+                if (entity instanceof Player player) {
+
                     player.jumpLevel = 4;
-                    hitBlockFromBelow(top, tx);
+
+                    if (isSolidTile(left, top)) {
+                        hitBlockFromBelow(top, left);
+                    }
+                    else {
+                        hitBlockFromBelow(top, right);
+                    }
                 }
-            }else if (isSolidTile(tx, bottom) && entity.velocityY > 0){
+            }
+        }
+
+        // 往下落
+        else if (entity.velocityY > 0) {
+            if (entity instanceof Player player) {System.out.println("mario velo"+ player.velocityY);}
+            if (isSolidTile(left, bottom) || isSolidTile(right, bottom)) {
+
                 entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
                 entity.velocityY = 0;
-                if (entity instanceof Player player){
-                    player.jumpLevel = 0;
-                }
                 entity.onGround = true;
-                playLandingSound();
+
+                if (entity instanceof Player player) {
+
+                    player.jumpLevel = 0;
+                    System.out.println("!wasonground"+!wasOnGround);
+                    // 只有真正落地瞬間播放一次
+                    if (!wasOnGround) {
+                        player.onGround = true;
+                        playLandingSound();
+                    }
+                }
             }
+        }
+        else{
+            entity.onGround = true;
         }
     }
 
@@ -665,9 +689,9 @@ public class Level1Controller {
         // Mario 尚未走到指定位置前，鏡頭不移動
 
         //稍微讓Mario 可以左右移動，可用可不用
-        if (cameraX < mario.x - 380 && cameraX < map[0].length*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH -6) {
+        if (cameraX < mario.x - 380 && cameraX < (map[0].length - 1)*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH - GameConfig.maxVelocityX) {
             cameraX += Math.max((mario.x - 380 - cameraX) * 0.3, 2);
-        } else if (cameraX > mario.x - 370 && cameraX > 0) {
+        } else if (cameraX > mario.x - 370 && cameraX > GameConfig.TILE_SIZE+GameConfig.maxVelocityX){
             cameraX += Math.min((mario.x - 370 - cameraX) * 0.3, -2);
         }
 
