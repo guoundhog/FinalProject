@@ -1,6 +1,12 @@
 package com.example.finalproject;
-
+import javafx.scene.control.Button;
 import javafx.animation.AnimationTimer;
+import javafx.animation.ScaleTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.RotateTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
@@ -16,10 +22,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Level1Controller {
 
@@ -35,8 +38,21 @@ public class Level1Controller {
     private Player mario;
     private List<Enemy> enemies = new ArrayList<>();
     private ImageView goal;
-    private ImageView background;
+    private final Map<String, ImageView> breakableBlocks = new HashMap<>();
+    private final Map<String, Integer> breakableBlockHp = new HashMap<>();
 
+    private ImageView background;
+    private Image stone0;
+    private Image stone1;
+    private Image stone2;
+    private Image stone3;
+    private Image hardBlockImage;
+    private Image specialBlockImage;
+    private Image bridgeImage;
+
+
+    private Image enemyImage;
+    private final List<com.example.finalproject.Enemy> enemies = new ArrayList<>();
     // ================= 音效與音樂 =================
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
@@ -47,6 +63,7 @@ public class Level1Controller {
     private boolean settingOpen = false;
     private AnimationTimer timer;
     private boolean gameFinished = false;
+    private int life = 1; // 生命數，目前先設 1，之後可以改成 3
 
     // ================= FPS 顯示 =================
     private Label fpsLabel;
@@ -67,22 +84,21 @@ public class Level1Controller {
     // 上一幀時間
     private long lastFrameTime = 0;
 
-    // ================= 地圖資料 =================
-    // 0 = 空氣
-    // 1 = 地板
-    // 2 = 石頭
-    // 3 = 終點
+// 0 = 空氣
+// 1 = 地板
+// 4 = 石頭
+// 9 = 終點
 
     private final int[][] map = {
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,2,0,0,0,2,2,2,2,2,0,0,0,2,2,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,2},
-            {2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,3,0,0,2},
-            {2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2}
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,0},
+            {1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1}
     };
 
     // ================= 初始化 =================
@@ -158,7 +174,6 @@ public class Level1Controller {
         // FPS 加到 root，才不會跟著地圖移動
         root.getChildren().add(fpsLabel);
     }
-
     private void updateFPS() {
         frames++;
         long now = System.nanoTime();
@@ -198,12 +213,16 @@ public class Level1Controller {
         });
 
         settingPane = new VBox(15);
+        Button backButton = new Button("Back To Menu");
+        backButton.setOnAction(e -> backToMenu());
+
         settingPane.getChildren().addAll(
                 title,
                 bgmText,
                 bgmSlider,
                 jumpText,
-                jumpSlider
+                jumpSlider,
+                backButton
         );
 
         settingPane.setLayoutX(GameConfig.WINDOW_WIDTH / 2.0 - 150);
@@ -231,8 +250,26 @@ public class Level1Controller {
             Platform.runLater(() -> root.requestFocus());
         }
     }
+    private void backToMenu() {
+        gameFinished = true;
 
+        if (timer != null) {timer.stop();}
+        if (bgmPlayer != null) {bgmPlayer.stop();}
 
+        SceneManager.switchScene("menu.fxml");
+    }
+    private void playerDead() {
+        life--;
+
+        if (life <= -1) {
+            gameFinished = true;
+
+            if (timer != null) {timer.stop();}
+            if (bgmPlayer != null) {bgmPlayer.stop();}
+
+            SceneManager.switchScene("lose.fxml");
+        }
+    }
 
     // ================= 建立主角 =================
     private void createPlayer() {
@@ -255,7 +292,14 @@ public class Level1Controller {
     private void createMap() {
         Image grass = new Image(getClass().getResourceAsStream("/image/grass.jpg"));
 
-        Image stone = new Image(getClass().getResourceAsStream("/image/stone0.png"));
+        stone0 = new Image(getClass().getResourceAsStream("/image/stone0.png"));
+        stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
+        stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
+        stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
+        enemyImage = new Image(getClass().getResourceAsStream("/image/enemy.png"));
+        hardBlockImage = new Image(getClass().getResourceAsStream("/image/grass_dark.png"));
+        specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
+        bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
 
         // 產生一直線地板
         // 逐列掃描地圖
@@ -268,21 +312,43 @@ public class Level1Controller {
                 ImageView block = null;
 
                 // ================= 地板 =================
-                // 深綠地板
-                if (tile == 1) {
+
+                // 草地
+                if (tile == GameConfig.GROUND) {
                     block = new ImageView(grass);
                 }
 
-                // 淺綠地板
-                else if (tile == 2) {
-                    block = new ImageView(stone);
+                // 石頭
+                else if (tile == GameConfig.STONE) {
+
+                    block = new ImageView(stone0);
+                    String key = row + "," + col;
+                    breakableBlocks.put(key, block);
+                    breakableBlockHp.put(key, GameConfig.STONE);
+                }
+                else if (tile == GameConfig.HARD_BLOCK) {
+                    block = new ImageView(hardBlockImage);
+                }
+                else if (tile == GameConfig.SPECIAL_BLOCK) {
+                    block = new ImageView(specialBlockImage);
+                    String key = row + "," + col;
+                    breakableBlocks.put(key, block);
+                }
+                else if (tile == GameConfig.BRIDGE) {
+                    block = new ImageView(bridgeImage);
                 }
 
                 // ================= 終點 =================
-                else if (tile == 3) {
-                    Image img = new Image(
-                            getClass().getResourceAsStream("/image/goal.png")
-                    );
+                else if (tile == GameConfig.ENEMY) {
+                    com.example.finalproject.Enemy enemy = new com.example.finalproject.Enemy(enemyImage);
+                    enemy.setLayoutX(col * GameConfig.TILE_SIZE);
+                    enemy.setLayoutY((row + 1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT);
+                    enemies.add(enemy);
+                    world.getChildren().add(enemy);
+                    map[row][col] = GameConfig.AIR;
+                }
+                else if (tile == GameConfig.GOAL) {
+                    Image img = new Image(getClass().getResourceAsStream("/image/goal.png"));
 
                     goal = new ImageView(img);
                     goal.setFitWidth(GameConfig.TILE_SIZE);
@@ -297,7 +363,8 @@ public class Level1Controller {
                     block.setFitWidth(GameConfig.TILE_SIZE);
                     block.setFitHeight(GameConfig.TILE_SIZE);
                     // col = X 座標
-                    block.setLayoutX((col - 1) * GameConfig.TILE_SIZE - 3);
+                    block.setLayoutX(col * GameConfig.TILE_SIZE);
+
                     // row = Y 座標
                     block.setLayoutY(row * GameConfig.TILE_SIZE);
 
@@ -306,8 +373,6 @@ public class Level1Controller {
             }
         }
     }
-
-
 
     // ================= 鍵盤設定 =================
     private void setupKeyboard() {
@@ -335,8 +400,6 @@ public class Level1Controller {
         });
     }
 
-
-
     // ================= 遊戲主迴圈 =================
     private void gameLoop() {
         timer = new AnimationTimer() {
@@ -351,8 +414,6 @@ public class Level1Controller {
         };
         timer.start();
     }
-
-
 
     // ================= 每幀更新 =================
     private void update() {
@@ -419,13 +480,226 @@ public class Level1Controller {
     private void updateEntity(Entity entity) {
         moveX(entity);
         moveY(entity);
+        // 更新 mapX mapY 座標
+        mario.mapX = (int) mario.getLayoutX() / GameConfig.TILE_SIZE;
+        mario.mapY = (int) mario.getLayoutY() / GameConfig.TILE_SIZE;
+
+
     }
+    private void moveEnemies() {
+        for (com.example.finalproject.Enemy enemy : enemies) {
+            enemy.setLayoutX(enemy.getLayoutX() + enemy.velocityX);
+
+            if (enemyHitWall(enemy) || enemyWillFall(enemy)) {
+                enemy.reverseDirection();
+            }
+        }
+    }
+
+    private boolean enemyHitWall(com.example.finalproject.Enemy enemy) {
+        int topRow = (int) (enemy.getLayoutY() / GameConfig.TILE_SIZE);
+        int bottomRow = (int) ((enemy.getLayoutY() + GameConfig.ENEMY_HEIGHT - 1) / GameConfig.TILE_SIZE);
+
+        if (enemy.velocityX > 0) {
+            int rightCol = (int) ((enemy.getLayoutX() + GameConfig.ENEMY_WIDTH) / GameConfig.TILE_SIZE);
+
+            for (int row = topRow; row <= bottomRow; row++) {
+                if (isSolidTile(row, rightCol)) {return true;}
+            }
+        }
+
+        if (enemy.velocityX < 0) {
+            int leftCol = (int) (enemy.getLayoutX() / GameConfig.TILE_SIZE);
+
+            for (int row = topRow; row <= bottomRow; row++) {
+                if (isSolidTile(row, leftCol)) {return true;}
+            }
+        }
+
+        return false;
+    }
+
+    private boolean enemyWillFall(com.example.finalproject.Enemy enemy) {
+        int footRow = (int) ((enemy.getLayoutY() + GameConfig.ENEMY_HEIGHT + 1) / GameConfig.TILE_SIZE);
+        int checkCol;
+
+        if (enemy.velocityX > 0) {
+            checkCol = (int) ((enemy.getLayoutX() + GameConfig.ENEMY_WIDTH + 1) / GameConfig.TILE_SIZE);
+        }
+        else {
+            checkCol = (int) ((enemy.getLayoutX() - 1) / GameConfig.TILE_SIZE);
+        }
+
+        return !isSolidTile(footRow, checkCol);
+    }
+
+    private void checkHorizontalCollision() {
+
+        int topRow = (int) (mario.getLayoutY() / GameConfig.TILE_SIZE);
+
+        int bottomRow = (int) ((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
+
+        if (mario.velocityX > 0) {
+
+            int rightCol = (int) ((mario.getLayoutX() + GameConfig.PLAYER_WIDTH) / GameConfig.TILE_SIZE);
+
+            for (int row = topRow; row <= bottomRow; row++) {
+
+                if (isSolidTile(row, rightCol)) {
+
+                    mario.setLayoutX(rightCol * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH);
+                    mario.velocityX = 0;
+                    break;
+                }
+            }
+        }
+
+        if (mario.velocityX < 0) {
+
+            int leftCol = (int) (mario.getLayoutX() / GameConfig.TILE_SIZE);
+
+            for (int row = topRow; row <= bottomRow; row++) {
+
+                if (isSolidTile(row, leftCol)) {
+                    mario.setLayoutX((leftCol + 1) * GameConfig.TILE_SIZE);
+                    mario.velocityX = 0;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void checkVerticalCollision() {
+
+        int leftCol = (int) (mario.getLayoutX() / GameConfig.TILE_SIZE);
+
+        int rightCol = (int) ((mario.getLayoutX() + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
+
+        if (mario.velocityY > 0) {
+
+            int bottomRow = (int) ((mario.getLayoutY() + GameConfig.PLAYER_HEIGHT) / GameConfig.TILE_SIZE);
+
+            for (int col = leftCol; col <= rightCol; col++) {
+
+                if (isSolidTile(bottomRow, col) || map[bottomRow][col] == GameConfig.BRIDGE) {
+                    mario.setLayoutY(bottomRow * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT);
+
+                    mario.velocityY = 0;
+
+                    if (mario.jumpLevel > 0) {
+                        mario.jumpLevel = 0;
+                        playLandingSound();
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        if (mario.velocityY < 0) {
+
+            int topRow = (int) (mario.getLayoutY() / GameConfig.TILE_SIZE);
+
+            for (int col = leftCol; col <= rightCol; col++) {
+
+                if (isSolidTile(topRow, col)) {
+
+                    mario.setLayoutY((topRow + 1) * GameConfig.TILE_SIZE);
+
+                    mario.velocityY = -mario.velocityY;
+
+                    hitBlockFromBelow(topRow, col);
+
+                    break;
+                }
+            }
+        }
+    }
+    private void hitBlockFromBelow(int row, int col) {
+
+        if (map[row][col] == GameConfig.HARD_BLOCK) {
+            mario.velocityY = -mario.velocityY;
+            return;
+        }
+
+        if (map[row][col] == GameConfig.SPECIAL_BLOCK) {
+            spawnSpecialItem(row, col);
+            map[row][col] = GameConfig.AIR;
+            removeBlockAt(row, col);
+            return;
+        }
+
+        if (map[row][col] != GameConfig.STONE) {
+            return;
+        }
+        playBlockHitAnimation(row, col);
+        String key = row + "," + col;
+
+        int hp = breakableBlockHp.get(key);
+
+        hp--;
+
+        if (hp == 3) {
+            breakableBlocks.get(key).setImage(stone1);
+        }
+        else if (hp == 2) {
+            breakableBlocks.get(key).setImage(stone2);
+        }
+        else if (hp == 1) {
+            breakableBlocks.get(key).setImage(stone3);
+        }
+        else {
+            ImageView block = breakableBlocks.get(key);
+
+            world.getChildren().remove(block);
+
+            breakableBlocks.remove(key);
+            breakableBlockHp.remove(key);
+
+            map[row][col] = 0;
+        }
+
+        breakableBlockHp.put(key, hp);
+    }
+    private void playBlockHitAnimation(int row, int col) {
+        String key = row + "," + col;
+        ImageView block = breakableBlocks.get(key);
 
     private void moveX(Entity entity) {
         // 限制最大水平速度
         if (entity.velocityX > GameConfig.maxVelocityX) {
             entity.velocityX = GameConfig.maxVelocityX;
         }
+        if (block == null) {return;}
+
+        TranslateTransition up = new TranslateTransition(Duration.millis(70), block);
+        up.setByY(-12);
+
+        TranslateTransition down = new TranslateTransition(Duration.millis(90), block);
+        down.setByY(12);
+
+        up.setOnFinished(e -> down.play());
+        up.play();
+    }
+
+    private void spawnSpecialItem(int row, int col) {
+        ImageView item = new ImageView(new Image(getClass().getResourceAsStream("/image/special_item.png")));
+        item.setFitWidth(GameConfig.TILE_SIZE);
+        item.setFitHeight(GameConfig.TILE_SIZE);
+        item.setLayoutX(col * GameConfig.TILE_SIZE);
+        item.setLayoutY((row - 1) * GameConfig.TILE_SIZE);
+        world.getChildren().add(item);
+    }
+    private void removeBlockAt(int row, int col) {
+        String key = row + "," + col;
+        ImageView block = breakableBlocks.get(key);
+
+        if (block != null) {
+            world.getChildren().remove(block);
+            breakableBlocks.remove(key);
+            breakableBlockHp.remove(key);
+        }
+    }
 
         if (entity.velocityX < -GameConfig.maxVelocityX) {
             entity.velocityX = -GameConfig.maxVelocityX;
@@ -520,7 +794,19 @@ public class Level1Controller {
             }
         }
     }
+    private boolean isSolidTile(int row, int col) {
 
+        // 超出地圖範圍就當成不能碰撞
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
+            return false;
+        }
+
+        // 代表可碰撞地板
+        return map[row][col] == GameConfig.GROUND
+                || map[row][col] == GameConfig.STONE
+                || map[row][col] == GameConfig.HARD_BLOCK
+                || map[row][col] == GameConfig.SPECIAL_BLOCK;
+    }
 
     // ================= 攝影機系統 =================
     private void updateCamera() {
@@ -537,9 +823,50 @@ public class Level1Controller {
         world.setLayoutX(-cameraX);
     }
 
-
-
     // ================= 終點判定 =================
+    private void checkEnemyCollision() {
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            Enemy enemy = enemies.get(i);
+
+            if (mario.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+                double marioBottom = mario.getLayoutY() + GameConfig.PLAYER_HEIGHT;
+                double enemyTop = enemy.getLayoutY();
+
+                // Mario 正在往下掉，且腳底接近敵人頭頂，代表踩到敵人
+                if (mario.velocityY > 0 && marioBottom - enemyTop < 25) {
+                    playEnemyDeathAnimation(enemy);
+                    enemies.remove(i);
+                    mario.velocityY = GameConfig.JUMP_POWER / 1.8;
+                    mario.jumpLevel = 10;
+                }
+                else {
+                    playerDead();
+                }
+            }
+        }
+    }
+
+    private void playEnemyDeathAnimation(Enemy enemy) {
+        ScaleTransition grow = new ScaleTransition(Duration.millis(80), enemy);
+        grow.setToX(1.4);
+        grow.setToY(1.4);
+
+        ScaleTransition shrink = new ScaleTransition(Duration.millis(160), enemy);
+        shrink.setToX(0);
+        shrink.setToY(0);
+
+        FadeTransition fade = new FadeTransition(Duration.millis(160), enemy);
+        fade.setToValue(0);
+
+        grow.setOnFinished(e -> {
+            ParallelTransition disappear = new ParallelTransition(shrink, fade);
+            disappear.setOnFinished(event -> world.getChildren().remove(enemy));
+            disappear.play();
+        });
+
+        grow.play();
+    }
+
     private void checkWin() {
         // 主角碰到終點後切換到勝利畫面
         if (!gameFinished && mario.view.getBoundsInParent().intersects(goal.getBoundsInParent())) {
@@ -553,12 +880,37 @@ public class Level1Controller {
                 bgmPlayer.stop();
             }
 
-            SceneManager.switchScene("win.fxml");
+            playGoalAnimation();
         }
     }
 
+    private void playGoalAnimation() {
+        if (timer != null) {timer.stop();}
+        if (bgmPlayer != null) {bgmPlayer.stop();}
 
+        RotateTransition rotate = new RotateTransition(Duration.millis(700), mario);
+        rotate.setByAngle(720);
 
+        ScaleTransition scale = new ScaleTransition(Duration.millis(700), mario);
+        scale.setToX(0);
+        scale.setToY(0);
+
+        TranslateTransition move = new TranslateTransition(Duration.millis(700), mario);
+        move.setToX(goal.getLayoutX() - mario.getLayoutX());
+        move.setToY(goal.getLayoutY() - mario.getLayoutY());
+
+        ParallelTransition animation = new ParallelTransition(rotate, scale, move);
+
+        animation.setOnFinished(e -> SceneManager.switchScene("win.fxml"));
+
+        animation.play();
+    }
+
+    private void checkDeath() {
+        if (mario.getLayoutY() > GameConfig.WINDOW_HEIGHT + 200) {
+            playerDead();
+        }
+    }
     // ================= 圖層順序 =================
     private void fixLayerOrder() {
         // 背景放最底層
