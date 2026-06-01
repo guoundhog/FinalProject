@@ -17,7 +17,8 @@ public class GameConfig {
     public static final int PLAYER_HEIGHT = 50;
     public static final double ACCELERATION = 2.7; // 加速度，越大起步越快
     public static final double FRICTION = 2; // 摩擦力，越大停下越快
-    public static final double MAX_MOVE_SPEED = 420; // 最大水平速度
+    public static final double maxVelocityX = 10.5; // 最大水平速度
+    public static final double maxVelocityY = -GameConfig.JUMP_POWER; // 最大垂直速度
     // 物理
     public static final double GRAVITY = 5.3;
     public static final double MOVE_SPEED = 10.5;

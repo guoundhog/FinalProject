@@ -3,26 +3,19 @@ package com.example.finalproject;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Enemy extends ImageView {
+public class Enemy extends Entity {
 
-    public double velocityX;
-    public boolean dead;
+    boolean alive = true;
 
-    public Enemy(Image image) {
-        super(image);
+    public Enemy(double x, double y) {
+        super(x, y, GameConfig.PLAYER_WIDTH, GameConfig.PLAYER_HEIGHT);
 
-        velocityX = GameConfig.ENEMY_SPEED;
-        dead = false;
+        velocityX = -2;
+        velocityY = 0;
 
-        setFitWidth(GameConfig.ENEMY_WIDTH);
-        setFitHeight(GameConfig.ENEMY_HEIGHT);
-    }
-
-    public void reverseDirection() {
-        velocityX = -velocityX;
-    }
-
-    public void die() {
-        dead = true;
+        Image img = new Image(getClass().getResourceAsStream("/image/mario.jpg"));
+        view = new ImageView(img);
+        view.setFitWidth(GameConfig.PLAYER_WIDTH);
+        view.setFitHeight(GameConfig.PLAYER_HEIGHT);
     }
 }

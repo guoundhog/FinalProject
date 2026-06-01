@@ -3,23 +3,16 @@ package com.example.finalproject;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Player extends ImageView {
+public class Player extends Entity {
 
-    public double velocityY = 0;
-    public double velocityX = 0;
-    public double maxVelocityY = -GameConfig.JUMP_POWER;
+    public int jumpLevel;
 
-    public int jumpLevel = 0;
-    public int mapX = 0;
-    public int mapY = 0;
+    public Player(double x, double y) {
+        super(x, y, GameConfig.PLAYER_WIDTH, GameConfig.PLAYER_HEIGHT);
 
-    public Player() {
-
-        Image img = new Image(getClass().getResourceAsStream("/image/actor.png"));
-
-        setImage(img);
-
-        setFitWidth(50);
-        setFitHeight(50);
+        Image img = new Image(getClass().getResourceAsStream("/image/menu.jpg"));
+        view = new ImageView(img);
+        view.setFitWidth(GameConfig.PLAYER_WIDTH);
+        view.setFitHeight(GameConfig.PLAYER_HEIGHT);
     }
 }
