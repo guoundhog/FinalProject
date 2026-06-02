@@ -13,10 +13,11 @@ public class GameConfig {
     public static final int GROUND_Y = (int) (WINDOW_HEIGHT*0.7);
 
     // 玩家
-    public static final int PLAYER_WIDTH = 60;
-    public static final int PLAYER_HEIGHT = 60;
+    public static final int PLAYER_WIDTH = 55;
+    public static final int PLAYER_HEIGHT = 55;
     public static final double ACCELERATION = 2.7; // 加速度，越大起步越快
     public static final double FRICTION = 2; // 摩擦力，越大停下越快
+//    public static final double maxVelocityX = 10.5; // 最大水平速度
     public static final double maxVelocityX = 11.7; // 最大水平速度
     public static final double maxVelocityY = -GameConfig.JUMP_POWER; // 最大垂直速度
     // 物理

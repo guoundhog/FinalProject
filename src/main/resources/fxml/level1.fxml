@@ -6,7 +6,7 @@
 <AnchorPane fx:id="root"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.finalproject.Level1Controller">
+            fx:controller="com.example.finalproject.classicController">
     <!-- 遊戲世界，攝影機只移動這個，不要移動 root -->
     <Group fx:id="world"/>
 </AnchorPane>
