@@ -60,7 +60,15 @@ public class ClassicController {
     private boolean settingOpen = false;
     private AnimationTimer timer;
     private boolean gameFinished = false;
-    private int life = 2; // 生命數，目前先設 1，之後可以改成 3
+    private int life = 2; // 生命數
+    private double saveX = GameConfig.TILE_SIZE;
+    private double saveY = GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT;
+    private final List<ImageView> checkpoints = new ArrayList<>();
+    private Image checkpointImage;
+    private Image checkedpointImage;
+
+    private ImageView checkpoint;
+    private boolean checkpointActivated = false;
 
     // ================= FPS 顯示 =================
     private Label fpsLabel;
@@ -93,15 +101,15 @@ public class ClassicController {
 //BRIDGE = 7;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
     };
 
     // ================= 初始化 =================
@@ -312,13 +320,22 @@ public class ClassicController {
     private void playerDead() {
         life--;
 
-        if (life <= 0) {
+        if (life <= -1) {
             gameFinished = true;
-
             if (timer != null) {timer.stop();}
             if (bgmPlayer != null) {bgmPlayer.stop();}
-
             SceneManager.switchScene("lose.fxml");
+        }
+        else {
+            mario.x = saveX;
+            mario.y = saveY;
+            mario.velocityX = 0;
+            mario.velocityY = 0;
+//            死亡後鏡頭、攝影機直接切換到存檔點位置，避免玩家看不到角色
+//            cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
+//            world.setLayoutX(-cameraX);
+            mario.render();
+            keys.clear();
         }
     }
 
@@ -348,6 +365,8 @@ public class ClassicController {
         hardBlockImage = new Image(getClass().getResourceAsStream("/image/hardBlock.png"));
         specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
         bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
+        checkpointImage = new Image(getClass().getResourceAsStream("/image/checkpoint.png"));
+        checkedpointImage = new Image(getClass().getResourceAsStream("/image/checkedpoint.png"));
 
         // 產生一直線地板
         // 逐列掃描地圖
@@ -390,6 +409,14 @@ public class ClassicController {
 //                    createEnemy(col * GameConfig.TILE_SIZE, (row) * GameConfig.TILE_SIZE-50);
 //                    System.out.println("enemy created at " + col * GameConfig.TILE_SIZE + ", " + ( (row) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT));
                     map[row][col] = GameConfig.AIR;
+                }
+                else if (tile == GameConfig.CHECKPOINT) {
+                    checkpoint = new ImageView(checkpointImage);
+                    checkpoint.setFitWidth(GameConfig.TILE_SIZE);
+                    checkpoint.setFitHeight(GameConfig.TILE_SIZE);
+                    checkpoint.setLayoutX(col * GameConfig.TILE_SIZE);
+                    checkpoint.setLayoutY(row * GameConfig.TILE_SIZE);
+                    world.getChildren().add(checkpoint);
                 }
                 else if (tile == GameConfig.GOAL) {
                     Image img = new Image(getClass().getResourceAsStream("/image/goal.png"));
@@ -476,6 +503,7 @@ public class ClassicController {
         checkEnemyCollision();
         checkWin();
         checkDeath();
+        checkCheckpoint();
         updateHUD();
         updateFPS();
         if(mario.jumpLevel >4){
@@ -792,6 +820,7 @@ public class ClassicController {
         }
 
         // 只移動遊戲世界，不移動 root
+        cameraX = Math.max(GameConfig.TILE_SIZE, cameraX);
         world.setLayoutX(-cameraX);
     }
 
@@ -881,6 +910,18 @@ public class ClassicController {
     private void checkDeath() {
         if (mario.y > GameConfig.WINDOW_HEIGHT + 200) {
             playerDead();
+        }
+    }
+
+    private void checkCheckpoint() {
+
+        if (checkpointActivated) return;
+
+        if (mario.view.getBoundsInParent().intersects(checkpoint.getBoundsInParent())) {
+            saveX = checkpoint.getLayoutX();
+            saveY = checkpoint.getLayoutY() - GameConfig.PLAYER_HEIGHT;
+            checkpoint.setImage(checkedpointImage);
+            checkpointActivated = true;
         }
     }
     // ================= 圖層順序 =================

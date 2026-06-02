@@ -31,12 +31,12 @@ public class GameConfig {
 
     public static final int AIR = 0;
     public static final int GROUND = 1;
-    public static final int GOAL = 9;
     public static final int STONE = 4;
-    public static final int ENEMY = 8;
     public static final int HARD_BLOCK = 5;
     public static final int SPECIAL_BLOCK = 6;
     public static final int BRIDGE = 7;
+    public static final int ENEMY = 8;
+    public static final int GOAL = 9;
     public static final int CHECKPOINT = 10;
     public static final int INVISIBLE_STONE = 11;
     public static final int DANGER_STONE = 12;
