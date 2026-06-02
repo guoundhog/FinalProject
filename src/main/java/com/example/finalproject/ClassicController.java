@@ -801,7 +801,7 @@ public class ClassicController {
         }
 
         else {
-            if (!(isSolidTile(left, bottom + 1) || isSolidTile(right, bottom + 1))) {
+            if (!(isSolidTile(left, bottom + 1) || isSolidTile(right, bottom + 1) || isBridge(left, bottom + 1) || isBridge(right, bottom + 1))) {
 
                 entity.onGround = false;
             }
