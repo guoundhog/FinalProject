@@ -85,17 +85,21 @@ public class Level1Controller {
 // 1 = 地板
 // 4 = 石頭
 // 9 = 終點
+//ENEMY = 8;
+//HARD_BLOCK = 5;
+//SPECIAL_BLOCK = 6;
+//BRIDGE = 7;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,5}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,1,1,1,1,1,5}
     };
 
     // ================= 初始化 =================
@@ -191,23 +195,27 @@ public class Level1Controller {
 
         Text bgmText = new Text("BGM Volume");
         bgmText.setFill(Color.WHITE);
-
         Slider bgmSlider = new Slider(0, 1, 0.5);
-
         bgmSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
             bgmPlayer.setVolume(newValue.doubleValue());
         });
 
 
-
         Text jumpText = new Text("Jump Volume");
         jumpText.setFill(Color.WHITE);
-
         Slider jumpSlider = new Slider(0, 1, 0.7);
-
         jumpSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
             jumpPlayer.setVolume(newValue.doubleValue());
         });
+
+
+        Text landText = new Text("land Volume");
+        landText.setFill(Color.WHITE);
+        Slider landSlider = new Slider(0, 1, 0.7);
+        landSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+            landingPlayer.setVolume(newValue.doubleValue());
+        });
+
 
         settingPane = new VBox(15);
         Button backButton = new Button("Back To Menu");
@@ -219,6 +227,8 @@ public class Level1Controller {
                 bgmSlider,
                 jumpText,
                 jumpSlider,
+                landText,
+                landSlider,
                 backButton
         );
 
@@ -385,7 +395,8 @@ public class Level1Controller {
 
         root.setOnKeyReleased(e -> {
             //鬆開SPACE 視為該次跳躍結束
-            if (e.getCode() == KeyCode.SPACE) {
+
+            if (e.getCode() == KeyCode.SPACE && !mario.onGround) {
                 mario.jumpLevel = 4;
             }
             keys.remove(e.getCode());
@@ -423,6 +434,10 @@ public class Level1Controller {
         checkWin();
         checkDeath();
         updateFPS();
+        if(mario.jumpLevel >4){
+            System.out.println(mario.jumpLevel);
+        }
+
     }
 
     // ================= 讀取鍵盤輸入 =================
@@ -465,6 +480,7 @@ public class Level1Controller {
             }
             mario.velocityY = GameConfig.JUMP_POWER;
             mario.jumpLevel++;
+
         }
     }
 
@@ -476,7 +492,8 @@ public class Level1Controller {
 
     private void hitBlockFromBelow(int row, int col) {
         if (map[row][col] == GameConfig.HARD_BLOCK) {
-            mario.velocityY = -mario.velocityY;
+            mario.velocityY = 0;
+//            mario.velocityY = -mario.velocityY;
             return;
         }
 
@@ -580,7 +597,6 @@ public class Level1Controller {
         if (!entity.onGround && entity.velocityY < GameConfig.maxVelocityY) {
             entity.velocityY += GameConfig.GRAVITY;
         }
-
         // 方塊碰撞檢測
         handleYCollision(entity);
     }
@@ -628,12 +644,12 @@ public class Level1Controller {
     private void handleYCollision(Entity entity) {
         int left = (int) (entity.x / GameConfig.TILE_SIZE);
         int right = (int) ((entity.x + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
+        int mid = (int) ((entity.x + GameConfig.PLAYER_WIDTH/2) / GameConfig.TILE_SIZE);
         int top = (int) (entity.y / GameConfig.TILE_SIZE);
         int bottom = (int) ((entity.y + GameConfig.PLAYER_HEIGHT - 1) / GameConfig.TILE_SIZE);
 
         // 往上撞
         if (entity.velocityY < 0) {
-
             if (isSolidTile(left, top) || isSolidTile(right, top)) {
 
                 entity.y = (top + 1) * GameConfig.TILE_SIZE;
@@ -642,14 +658,19 @@ public class Level1Controller {
                 if (entity instanceof Player player) {
 
                     player.jumpLevel = 4;
-
-                    if (isSolidTile(left, top)) {
+                    if(isSolidTile(mid, top)) {
+                        hitBlockFromBelow(top, mid);
+                    }
+                    else if (isSolidTile(left, top)) {
                         hitBlockFromBelow(top, left);
                     }
                     else {
                         hitBlockFromBelow(top, right);
                     }
                 }
+            }
+            else if (!isSolidTile(left, bottom) && !isSolidTile(right, bottom)) {
+                entity.onGround = false;
             }
         }
 
@@ -662,7 +683,7 @@ public class Level1Controller {
 
                 if (entity instanceof Player player) {
                     player.jumpLevel = 0;
-                    //System.out.println("!wasonground"+!wasOnGround);
+
                     // 只有真正落地瞬間播放一次
                     if (!player.onGround) {
                         playLandingSound();
@@ -677,7 +698,7 @@ public class Level1Controller {
 
         else {
             if (!(isSolidTile(left, bottom + 1) || isSolidTile(right, bottom + 1))) {
-                //System.out.println(2);
+
                 entity.onGround = false;
             }
         }
@@ -711,8 +732,8 @@ public class Level1Controller {
                 if (mario.velocityY > 0 && marioBottom - enemyTop > 0) {
                     playEnemyDeathAnimation(enemy);
                     enemies.remove(i);
-                    mario.velocityY = GameConfig.JUMP_POWER / 1.8;
-                    mario.jumpLevel = 10;
+                    mario.velocityY = GameConfig.JUMP_POWER / 1.15;
+//                    mario.jumpLevel = 10; 忘記為啥這樣寫
                 }
                 else {
                     playerDead();
