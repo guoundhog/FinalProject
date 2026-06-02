@@ -24,7 +24,7 @@ import javafx.scene.text.Text;
 
 import java.util.*;
 
-public class classicController {
+public class SpecialController {
 
     // ================= FXML 元件 =================
     @FXML
@@ -46,6 +46,7 @@ public class classicController {
     private Image stone1;
     private Image stone2;
     private Image stone3;
+    private Image dangerStone;
     private Image hardBlockImage;
     private Image specialBlockImage;
     private Image bridgeImage;
@@ -96,7 +97,7 @@ public class classicController {
             {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
             {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,10,11,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,9,0,5},
             {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,1,1,1,1,1,1,1,5}
@@ -164,8 +165,8 @@ public class classicController {
     private void createFPSCounter() {
         fpsLabel = new Label("FPS: 0");
         fpsLabel.setStyle("-fx-text-fill: white;" +
-                        "-fx-font-size: 20px;" +
-                        "-fx-background-color: black;");
+                "-fx-font-size: 20px;" +
+                "-fx-background-color: black;");
 
         // FPS 固定在畫面左上角
         fpsLabel.setLayoutX(20);
@@ -303,6 +304,7 @@ public class classicController {
         stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
         stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
         stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
+        dangerStone = new Image(getClass().getResourceAsStream("/image/dangerStone.png"));
         hardBlockImage = new Image(getClass().getResourceAsStream("/image/stone0.png"));
         specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
         bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
@@ -326,11 +328,20 @@ public class classicController {
 
                 // 石頭
                 else if (tile == GameConfig.STONE) {
-
                     block = new ImageView(stone0);
                     String key = row + "," + col;
                     breakableBlocks.put(key, block);
                     breakableBlockHp.put(key, GameConfig.STONE);
+                }
+                else if (tile == GameConfig.INVISIBLE_STONE) {
+                    block = new ImageView();
+                    String key = row + "," + col;
+                    breakableBlocks.put(key, block);
+                }
+                else if (tile == GameConfig.DANGER_STONE) {
+                    block = new ImageView(stone0);
+                    String key = row + "," + col;
+                    breakableBlocks.put(key, block);
                 }
                 else if (tile == GameConfig.HARD_BLOCK) {
                     block = new ImageView(hardBlockImage);
@@ -497,6 +508,20 @@ public class classicController {
             return;
         }
 
+        if (map[row][col] == GameConfig.INVISIBLE_STONE) {
+            mario.velocityY = 0;
+            ImageView block = breakableBlocks.get(row + "," + col);
+            block.setImage(stone0);
+            return;
+        }
+
+        if (map[row][col] == GameConfig.DANGER_STONE) {
+            mario.velocityY = 0;
+            ImageView block = breakableBlocks.get(row + "," + col);
+            block.setImage(dangerStone);
+            return;
+        }
+
         if (map[row][col] == GameConfig.SPECIAL_BLOCK) {
             spawnSpecialItem(row, col);
             map[row][col] = GameConfig.AIR;
@@ -610,6 +635,8 @@ public class classicController {
         // 代表可碰撞地板
         return map[row][col] == GameConfig.GROUND
                 || map[row][col] == GameConfig.STONE
+                || map[row][col] == GameConfig.INVISIBLE_STONE
+                || map[row][col] == GameConfig.DANGER_STONE
                 || map[row][col] == GameConfig.HARD_BLOCK
                 || map[row][col] == GameConfig.SPECIAL_BLOCK;
     }
@@ -729,7 +756,7 @@ public class classicController {
                 double enemyTop = enemy.y;
 
                 // Mario 正在往下掉，且腳底接近敵人頭頂，代表踩到敵人
-                if (mario.velocityY > 0 && marioBottom - enemyTop > 0) {
+                if (mario.velocityY > 0 && marioBottom - enemyTop > 0 && marioBottom - enemyTop < 20) {
                     playEnemyDeathAnimation(enemy);
                     enemies.remove(i);
                     mario.velocityY = GameConfig.JUMP_POWER / 1.15;

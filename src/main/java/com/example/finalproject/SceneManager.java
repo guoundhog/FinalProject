@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 public class SceneManager {
 
+    private static String lastGameFXML;
     private static Stage stage;
 
     public static void setStage(Stage s) {
@@ -15,6 +16,10 @@ public class SceneManager {
     }
 
     public static void switchScene(String fxml) {
+        // 如果是遊戲場景就記錄
+        if(fxml.equals("classic.fxml") || fxml.equals("special.fxml")) {
+            lastGameFXML = fxml;
+        }
 
         try {
 
@@ -46,5 +51,9 @@ public class SceneManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static String getLastGameFXML() {
+        return lastGameFXML;
     }
 }

@@ -3,12 +3,14 @@ package com.example.finalproject;
 public class WinController {
 
     public void playAgain() {
+        String lastScene = SceneManager.getLastGameFXML();
 
-        SceneManager.switchScene("level1.fxml");
+        if (lastScene != null) {
+            SceneManager.switchScene(lastScene);
+        }
     }
 
     public void backMenu() {
-
         SceneManager.switchScene("menu.fxml");
     }
 }

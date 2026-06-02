@@ -10,7 +10,12 @@
          <Image url="@../image/menu.png" />
       </image>
    </ImageView>
-   <ImageView fx:id="classic" fitHeight="150.0" fitWidth="200.0" layoutX="276.0" layoutY="273.0" onMouseClicked="#classicMode" onMouseEntered="#bigText" onMouseExited="#smallText" pickOnBounds="true">
+   <ImageView fx:id="classic" fitHeight="150.0" fitWidth="200.0" layoutX="279.0" layoutY="273.0" onMouseClicked="#classicMode" onMouseEntered="#bigText" onMouseExited="#smallText" pickOnBounds="true">
+      <image>
+         <Image url="@../image/goal.png" />
+      </image>
+   </ImageView>
+   <ImageView fx:id="special" fitHeight="150.0" fitWidth="200.0" layoutX="526.0" layoutY="273.0" onMouseClicked="#specialMode" onMouseEntered="#bigText" onMouseExited="#smallText" pickOnBounds="true">
       <image>
          <Image url="@../image/goal.png" />
       </image>

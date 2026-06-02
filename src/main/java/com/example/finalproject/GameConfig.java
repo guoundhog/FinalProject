@@ -37,6 +37,8 @@ public class GameConfig {
     public static final int HARD_BLOCK = 5;
     public static final int SPECIAL_BLOCK = 6;
     public static final int BRIDGE = 7;
+    public static final int INVISIBLE_STONE = 10;
+    public static final int DANGER_STONE = 11;
 // =============== ENEMY DETAIL =================
     public static final int ENEMY_WIDTH = 50;
     public static final int ENEMY_HEIGHT = 50;

@@ -13,6 +13,9 @@ public class MenuController {
     @FXML
     private ImageView classic;
 
+    @FXML
+    private ImageView special;
+
     //一點點動畫效果
     @FXML
     public void bigText(MouseEvent e){
@@ -40,7 +43,7 @@ public class MenuController {
 
     public void classicMode() {
 
-        SceneManager.switchScene("level1.fxml");
+        SceneManager.switchScene("classic.fxml");
     }
 
     public void specialMode() {
