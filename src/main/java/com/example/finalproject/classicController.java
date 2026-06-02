@@ -22,6 +22,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+
 import java.util.*;
 
 public class classicController {
@@ -60,10 +61,12 @@ public class classicController {
     private boolean settingOpen = false;
     private AnimationTimer timer;
     private boolean gameFinished = false;
-    private int life = 1; // 生命數，目前先設 1，之後可以改成 3
+    private int life = 2; // 生命數，目前先設 1，之後可以改成 3
 
     // ================= FPS 顯示 =================
     private Label fpsLabel;
+    private Label distanceLabel;
+    private Label lifeLabel;
     private long lastTime = 0;
     private int frames = 0;
 
@@ -91,15 +94,15 @@ public class classicController {
 //BRIDGE = 7;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,9,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,1,1,1,1,1,1,1,5}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
     };
 
     // ================= 初始化 =================
@@ -162,17 +165,49 @@ public class classicController {
 
     // ================= FPS 顯示 =================
     private void createFPSCounter() {
+
         fpsLabel = new Label("FPS: 0");
-        fpsLabel.setStyle("-fx-text-fill: white;" +
+
+        fpsLabel.setStyle(
+                "-fx-text-fill: white;" +
                         "-fx-font-size: 20px;" +
-                        "-fx-background-color: black;");
+                        "-fx-font-weight: bold;"
+        );
 
-        // FPS 固定在畫面左上角
         fpsLabel.setLayoutX(20);
-        fpsLabel.setLayoutY(20);
+        fpsLabel.setLayoutY(50);
 
-        // FPS 加到 root，才不會跟著地圖移動
         root.getChildren().add(fpsLabel);
+
+
+        // 距離
+        distanceLabel = new Label("Distance: 0 m");
+
+        distanceLabel.setStyle(
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 24px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        distanceLabel.setLayoutX(20);
+        distanceLabel.setLayoutY(20);
+
+        root.getChildren().add(distanceLabel);
+
+
+        // 生命
+        lifeLabel = new Label("Life: " + life);
+
+        lifeLabel.setStyle(
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 24px;" +
+                "-fx-font-weight: bold;"
+        );
+
+        lifeLabel.setLayoutX(GameConfig.WINDOW_WIDTH - 120);
+        lifeLabel.setLayoutY(20);
+
+        root.getChildren().add(lifeLabel);
     }
 
     private void updateFPS() {
@@ -185,6 +220,13 @@ public class classicController {
             frames = 0;
             lastTime = now;
         }
+    }
+    private void updateHUD() {
+
+        // 64像素 = 1公尺
+        int distance = (int)(mario.x / GameConfig.TILE_SIZE);
+        distanceLabel.setText("Distance: " + distance + " m");
+        lifeLabel.setText("Life: " + life);
     }
 
     // ================= 設定選單 =================
@@ -270,7 +312,7 @@ public class classicController {
     private void playerDead() {
         life--;
 
-        if (life <= -1) {
+        if (life <= 0) {
             gameFinished = true;
 
             if (timer != null) {timer.stop();}
@@ -303,7 +345,7 @@ public class classicController {
         stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
         stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
         stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
-        hardBlockImage = new Image(getClass().getResourceAsStream("/image/stone0.png"));
+        hardBlockImage = new Image(getClass().getResourceAsStream("/image/hardBlock.png"));
         specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
         bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
 
@@ -422,6 +464,7 @@ public class classicController {
     private void update() {
         handleInput();
         updateEntity(mario);
+        updatePlayerSprite();
         for (Entity e : enemies){
             updateEntity(e);
         }
@@ -433,6 +476,7 @@ public class classicController {
         checkEnemyCollision();
         checkWin();
         checkDeath();
+        updateHUD();
         updateFPS();
         if(mario.jumpLevel >4){
             System.out.println(mario.jumpLevel);
@@ -444,11 +488,13 @@ public class classicController {
     private void handleInput() {
         // A 鍵向左加速，Mario 不會超出左邊界
         if (keys.contains(KeyCode.A)) {
+            mario.facingRight = false;
             mario.velocityX -= GameConfig.ACCELERATION;
         }
 
         // D 鍵向右加速，Mario 不會超出地圖右邊界
         if (keys.contains(KeyCode.D)){
+            mario.facingRight = true;
             mario.velocityX += GameConfig.ACCELERATION;
         }
 
@@ -488,6 +534,26 @@ public class classicController {
     private void updateEntity(Entity entity) {
         moveX(entity);
         moveY(entity);
+    }
+    private void updatePlayerSprite() {
+
+        // 空中
+        if (!mario.onGround) {
+            mario.view.setImage(mario.actorJumpImage);
+        }
+
+        // 地面
+        else {
+            mario.view.setImage(mario.actorImage);
+        }
+
+        // 左右翻轉
+        if (!mario.facingRight) {
+            mario.view.setScaleX(1);
+        }
+        else {
+            mario.view.setScaleX(-1);
+        }
     }
 
     private void hitBlockFromBelow(int row, int col) {
@@ -614,6 +680,15 @@ public class classicController {
                 || map[row][col] == GameConfig.SPECIAL_BLOCK;
     }
 
+    private boolean isBridge(int col, int row) {
+        // 超出地圖範圍就當成不能碰撞
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
+            return false;
+        }
+        // 代表可碰撞地板
+        return map[row][col] == GameConfig.BRIDGE;
+    }
+
     private void handleXCollision(Entity entity) {
         // 更新 mapX mapY 座標
         int left = (int) (entity.x / GameConfig.TILE_SIZE);
@@ -676,7 +751,7 @@ public class classicController {
 
         // 往下落
         else if (entity.velocityY > 0) {
-            if (isSolidTile(left, bottom) || isSolidTile(right, bottom)) {
+            if (isSolidTile(left, bottom) || isSolidTile(right, bottom) || isBridge(left, bottom) || isBridge(right, bottom)) {
 
                 entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
                 entity.velocityY = 0;
