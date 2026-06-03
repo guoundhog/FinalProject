@@ -20,7 +20,7 @@ public class LoseController {
         gameOverBGMPlayer = new MediaPlayer(gameOverBGM);
         gameOverBGMPlayer.setVolume(0.7);
         gameOverBGMPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        gameOverBGMPlayer.play();
+        //gameOverBGMPlayer.play();
     }
 
     public void playAgain() {
