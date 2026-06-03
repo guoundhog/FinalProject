@@ -41,6 +41,8 @@ public class SpecialController {
     private ImageView goal;
     private final Map<String, ImageView> breakableBlocks = new HashMap<>();
     private final Map<String, Integer> breakableBlockHp = new HashMap<>();
+    private final Map<String, ImageView> fakeBlocks = new HashMap<>();
+    private final Map<String, Double> fallingFakeBlockVelocityY = new HashMap<>();
 
     private ImageView background;
     private Image stone0;
@@ -125,7 +127,7 @@ public class SpecialController {
             {5,0,0,0,0,11,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 1,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
     };
     private int[][] moveMap = new int[map.length][];
 
@@ -599,6 +601,12 @@ public class SpecialController {
                     goal.setLayoutY(row * GameConfig.TILE_SIZE);
                     world.getChildren().add(goal);
                 }
+                else if (tile == GameConfig.FAKE_GROUND) {
+                    block = new ImageView(grass);
+
+                    String key = row + "," + col;
+                    fakeBlocks.put(key, block);
+                }
 
                 // ================= 放置地板 =================
                 if (block != null) {
@@ -682,6 +690,10 @@ public class SpecialController {
         for (Entity e : enemies){
             e.render();
         }
+
+        checkFakeBlockTouch();
+        updateFallingFakeBlocks();
+
         checkEnemyCollision();
         checkWin();
         checkDeath();
@@ -1034,6 +1046,74 @@ public class SpecialController {
         }
     }
 
+    private void checkFakeBlockTouch() {
+        int left = (int) (mario.x / GameConfig.TILE_SIZE);
+        int right = (int) ((mario.x + GameConfig.PLAYER_WIDTH - 1) / GameConfig.TILE_SIZE);
+        int top = (int) (mario.y / GameConfig.TILE_SIZE);
+        int bottom = (int) ((mario.y + GameConfig.PLAYER_HEIGHT + 1) / GameConfig.TILE_SIZE);
+
+        checkOneFakeBlock(top, left);
+        checkOneFakeBlock(top, right);
+        checkOneFakeBlock(bottom, left);
+        checkOneFakeBlock(bottom, right);
+    }
+    private void checkOneFakeBlock(int row, int col) {
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
+            return;
+        }
+
+        if (moveMap[row][col] != GameConfig.FAKE_GROUND) {
+            return;
+        }
+
+        String key = row + "," + col;
+
+        if (!fakeBlocks.containsKey(key)) {
+            return;
+        }
+
+        // 已經在掉落，就不要重複觸發
+        if (fallingFakeBlockVelocityY.containsKey(key)) {
+            return;
+        }
+
+        // 觸發後，從地圖上變成空氣
+        moveMap[row][col] = GameConfig.AIR;
+
+        // 用角色當下的 y 速度當作方塊初速
+        fallingFakeBlockVelocityY.put(key, mario.velocityY);
+    }
+
+    private void updateFallingFakeBlocks() {
+        List<String> removeKeys = new ArrayList<>();
+
+        for (String key : fallingFakeBlockVelocityY.keySet()) {
+            ImageView block = fakeBlocks.get(key);
+
+            if (block == null) {
+                removeKeys.add(key);
+                continue;
+            }
+
+            double velocityY = fallingFakeBlockVelocityY.get(key);
+
+            block.setLayoutY(block.getLayoutY() + velocityY);
+
+            velocityY += GameConfig.GRAVITY;
+
+            fallingFakeBlockVelocityY.put(key, velocityY);
+
+            if (block.getLayoutY() > GameConfig.WINDOW_HEIGHT + 200) {
+                world.getChildren().remove(block);
+                fakeBlocks.remove(key);
+                removeKeys.add(key);
+            }
+        }
+
+        for (String key : removeKeys) {
+            fallingFakeBlockVelocityY.remove(key);
+        }
+    }
     // ================= 攝影機系統 =================
     private void updateCamera() {
         // Mario 尚未走到指定位置前，鏡頭不移動
