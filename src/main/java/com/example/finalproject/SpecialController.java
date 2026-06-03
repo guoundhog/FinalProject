@@ -193,6 +193,13 @@ public class SpecialController {
         Media dog2Sound = new Media(getClass().getResource("/sound/dog2.mp3").toExternalForm());
         dog2Player = new MediaPlayer(dog2Sound);
         dog2Player.setVolume(0.8);
+        dog2Player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                dog2Player.seek(Duration.ZERO);
+                dog2Player.pause();
+            }
+        });
     }
 
     private void playJumpSound() {
@@ -212,7 +219,8 @@ public class SpecialController {
         landingPlayer.stop();
         landingPlayer.play();
     }
-    private void playbreakingSound() {
+
+    private void playBreakingSound() {
         if (breakingPlayer == null) {
             return;
         }
@@ -849,7 +857,7 @@ public class SpecialController {
         }
         playBlockHitAnimation(row, col);
         String key = row + "," + col;
-        playbreakingSound();
+        playBreakingSound();
         int hp = breakableBlockHp.get(key);
         hp--;
 
@@ -1166,6 +1174,10 @@ public class SpecialController {
             double diffY = Math.abs(dog.y - mario.y);
 
             if (diffY < GameConfig.TILE_SIZE && diffX < GameConfig.TILE_SIZE * GameConfig.DOG_RANGETAIL) {
+
+                if (dog2Player.getStatus() != MediaPlayer.Status.PLAYING) {
+                    dog2Player.play();
+                }
 
                 if (mario.x < dog.x) {
                     dog.velocityX = -GameConfig.DOG_SPEED;
