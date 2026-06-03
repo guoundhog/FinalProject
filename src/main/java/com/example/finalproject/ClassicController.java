@@ -56,6 +56,7 @@ public class ClassicController {
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
     private MediaPlayer landingPlayer;
+    private MediaPlayer breakingPlayer;
     private MediaPlayer enemyBGMPlayer;
 
     // ================= 設定選單 =================
@@ -116,15 +117,19 @@ public class ClassicController {
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5 ,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5 ,5,5,5,5,5,5,5,5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
+            {5,4,4,4,4,5,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5 ,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5 ,5,5,5,5,5,5,5,5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
             {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
     };
+    private int[][] movemap = new int[map.length][];
 
     // ================= 初始化 =================
     public void initialize() {
+        for (int i = 0; i < map.length; i++) {
+            movemap[i] = map[i].clone();
+        }
         createBackground();
         createMap();
         createPlayer();
@@ -163,9 +168,9 @@ public class ClassicController {
         landingPlayer = new MediaPlayer(landing);
         landingPlayer.setVolume(0.7);
 
-
-
-
+        Media breaking = new Media(getClass().getResource("/sound/breaking.mp3").toExternalForm());
+        breakingPlayer = new MediaPlayer(breaking);
+        breakingPlayer.setVolume(0.7);
 
         Media enemyBGM = new Media(getClass().getResource("/sound/enemyBGM.mp3").toExternalForm());
         enemyBGMPlayer = new MediaPlayer(enemyBGM);
@@ -188,6 +193,14 @@ public class ClassicController {
         // 先 stop 再 play，避免連續落地時音效播不出來
         landingPlayer.stop();
         landingPlayer.play();
+    }
+    private void playbreakingSound() {
+        if (breakingPlayer == null) {
+            return;
+        }
+        // 先 stop 再 play，避免連續落地時音效播不出來
+        breakingPlayer.stop();
+        breakingPlayer.play();
     }
 
     // ================= FPS 顯示 =================
@@ -445,6 +458,8 @@ public class ClassicController {
     }
 
     private void respawnPlayer() {
+        resetLevelKeepCheckpoint();
+
         mario.x = saveX;
         mario.y = saveY;
         mario.velocityX = 0;
@@ -452,19 +467,35 @@ public class ClassicController {
         mario.onGround = false;
         mario.jumpLevel = 0;
         mario.isDead = false;
+
         cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
         world.setLayoutX(-cameraX);
 
         keys.clear();
         mario.render();
-        mario.view.setRotate(0);
-        mario.view.setScaleX(1);
-        mario.view.setScaleY(1);
-        mario.view.setTranslateX(0);
-        mario.view.setTranslateY(0);
     }
 
+    private void resetLevelKeepCheckpoint() {
+        world.getChildren().clear();
 
+        enemies.clear();
+        breakableBlocks.clear();
+        breakableBlockHp.clear();
+
+        goal = null;
+        checkpoint = null;
+
+        createMap();
+        createPlayer();
+        for (int i = 0; i < map.length; i++) {
+            movemap[i] = map[i].clone();
+        }
+        if (checkpointActivated && checkpoint != null) {
+            checkpoint.setImage(checkedpointImage);
+        }
+
+        fixLayerOrder();
+    }
     // ================= 建立主角 =================
     private void createPlayer() {
         // 主角起始 X 座標，讓角色直接站在地板上
@@ -544,7 +575,7 @@ public class ClassicController {
                     createEnemy(col * GameConfig.TILE_SIZE, (row+1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT) ;
 //                    createEnemy(col * GameConfig.TILE_SIZE, (row) * GameConfig.TILE_SIZE-50);
 //                    System.out.println("enemy created at " + col * GameConfig.TILE_SIZE + ", " + ( (row) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT));
-                    map[row][col] = GameConfig.AIR;
+                    movemap[row][col] = GameConfig.AIR;
                 }
                 else if (tile == GameConfig.CHECKPOINT) {
                     checkpoint = new ImageView(checkpointImage);
@@ -735,41 +766,40 @@ public class ClassicController {
     }
 
     private void hitBlockFromBelow(int row, int col) {
-        if (map[row][col] == GameConfig.HARD_BLOCK) {
+        if (movemap[row][col] == GameConfig.HARD_BLOCK) {
             mario.velocityY = 0;
 //            mario.velocityY = -mario.velocityY;
             return;
         }
 
-        if (map[row][col] == GameConfig.INVISIBLE_STONE) {
+        if (movemap[row][col] == GameConfig.INVISIBLE_STONE) {
             mario.velocityY = 0;
             ImageView block = breakableBlocks.get(row + "," + col);
             block.setImage(stone0);
             return;
         }
 
-        if (map[row][col] == GameConfig.DANGER_STONE) {
+        if (movemap[row][col] == GameConfig.DANGER_STONE) {
             mario.velocityY = 0;
             ImageView block = breakableBlocks.get(row + "," + col);
             block.setImage(dangerStone);
             return;
         }
 
-        if (map[row][col] == GameConfig.SPECIAL_BLOCK) {
+        if (movemap[row][col] == GameConfig.SPECIAL_BLOCK) {
             spawnSpecialItem(row, col);
-            map[row][col] = GameConfig.AIR;
+            movemap[row][col] = GameConfig.AIR;
             removeBlockAt(row, col);
             return;
         }
 
-        if (map[row][col] != GameConfig.STONE) {
+        if (movemap[row][col] != GameConfig.STONE) {
             return;
         }
         playBlockHitAnimation(row, col);
         String key = row + "," + col;
-
+        playbreakingSound();
         int hp = breakableBlockHp.get(key);
-
         hp--;
 
         if (hp == 3) {
@@ -789,7 +819,7 @@ public class ClassicController {
             breakableBlocks.remove(key);
             breakableBlockHp.remove(key);
 
-            map[row][col] = 0;
+            movemap[row][col] = 0;
         }
 
         breakableBlockHp.put(key, hp);
@@ -866,12 +896,12 @@ public class ClassicController {
             return false;
         }
         // 代表可碰撞地板
-        return map[row][col] == GameConfig.GROUND
-                || map[row][col] == GameConfig.STONE
-                || map[row][col] == GameConfig.INVISIBLE_STONE
-                || map[row][col] == GameConfig.DANGER_STONE
-                || map[row][col] == GameConfig.HARD_BLOCK
-                || map[row][col] == GameConfig.SPECIAL_BLOCK;
+        return movemap[row][col] == GameConfig.GROUND
+                || movemap[row][col] == GameConfig.STONE
+                || movemap[row][col] == GameConfig.INVISIBLE_STONE
+                || movemap[row][col] == GameConfig.DANGER_STONE
+                || movemap[row][col] == GameConfig.HARD_BLOCK
+                || movemap[row][col] == GameConfig.SPECIAL_BLOCK;
     }
 
     private boolean isBridge(int col, int row) {
@@ -880,7 +910,7 @@ public class ClassicController {
             return false;
         }
         // 代表可碰撞地板
-        return map[row][col] == GameConfig.BRIDGE;
+        return movemap[row][col] == GameConfig.BRIDGE;
     }
 
     private void handleXCollision(Entity entity) {

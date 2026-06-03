@@ -10,7 +10,7 @@ public class GameConfig {
     public static final int TILE_SIZE = 64;
 
     // 地板
-    public static final int GROUND_Y = (int) (WINDOW_HEIGHT*0.7);
+    public static final int GROUND_Y = (int) (TILE_SIZE*8);
 
     // 玩家
     public static final int PLAYER_WIDTH = 55;
