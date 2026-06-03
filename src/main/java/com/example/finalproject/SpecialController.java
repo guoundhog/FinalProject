@@ -6,6 +6,7 @@ import javafx.animation.TranslateTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -55,13 +56,16 @@ public class SpecialController {
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
     private MediaPlayer landingPlayer;
+    private MediaPlayer enemyBGMPlayer;
 
     // ================= 設定選單 =================
     private VBox settingPane;
     private boolean settingOpen = false;
     private AnimationTimer timer;
     private boolean gameFinished = false;
-    private int life = 2; // 生命數
+    private ImageView deathTransitionImage;
+    private boolean respawning = false;
+    private int life = 3; // 生命數
     private double saveX = GameConfig.TILE_SIZE;
     private double saveY = GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT;
     private final List<ImageView> checkpoints = new ArrayList<>();
@@ -71,6 +75,12 @@ public class SpecialController {
     private ImageView checkpoint;
     private boolean checkpointActivated = false;
 
+    private boolean isFirstEnemyShow = true;
+
+    private boolean deathFlying = false;
+    private double deathVelocityX;
+    private double deathVelocityY;
+    private double deathRotateSpeed;
     // ================= FPS 顯示 =================
     private Label fpsLabel;
     private Label distanceLabel;
@@ -119,6 +129,7 @@ public class SpecialController {
         createMap();
         createPlayer();
         createFPSCounter();
+        createDeathTransitionImage();
         setupMusic();
         createSettingPane();
         setupKeyboard();
@@ -151,6 +162,14 @@ public class SpecialController {
         Media landing = new Media(getClass().getResource("/sound/pipe.mp3").toExternalForm());
         landingPlayer = new MediaPlayer(landing);
         landingPlayer.setVolume(0.7);
+
+
+
+
+
+        Media enemyBGM = new Media(getClass().getResource("/sound/enemyBGM.mp3").toExternalForm());
+        enemyBGMPlayer = new MediaPlayer(enemyBGM);
+        enemyBGMPlayer.setVolume(0.7);
     }
 
     private void playJumpSound() {
@@ -215,6 +234,19 @@ public class SpecialController {
         lifeLabel.setLayoutY(20);
 
         root.getChildren().add(lifeLabel);
+    }
+
+    private void createDeathTransitionImage() {
+        Image img = new Image(getClass().getResourceAsStream("/image/deathTransition.jpg"));
+
+        deathTransitionImage = new ImageView(img);
+        deathTransitionImage.setFitWidth(GameConfig.WINDOW_WIDTH);
+        deathTransitionImage.setFitHeight(GameConfig.WINDOW_HEIGHT);
+        deathTransitionImage.setOpacity(0);
+        deathTransitionImage.setVisible(false);
+        deathTransitionImage.setMouseTransparent(true);
+
+        root.getChildren().add(deathTransitionImage);
     }
 
     private void updateFPS() {
@@ -318,26 +350,120 @@ public class SpecialController {
     }
 
     private void playerDead() {
-        life--;
+        if (respawning || mario.isDead) {return;}
 
-        if (life <= -1) {
+        life--;
+        mario.isDead = true;
+        keys.clear();
+        startDeathFlyAnimation();
+    }
+    private void startDeathFlyAnimation() {
+        deathFlying = true;
+
+        keys.clear();
+        mario.velocityX = 0;
+        mario.velocityY = 0;
+
+        deathVelocityX = (Math.random() * 50 -25) ;
+        deathVelocityY = -(Math.random() * 12 + 20);
+        deathRotateSpeed = Math.random() * 50 + 10;
+
+        if (Math.random() < 0.5) {
+            deathRotateSpeed = -deathRotateSpeed;
+        }
+
+        mario.view.setRotate(0);
+
+        mario.view.setTranslateX(Math.random() * 20 - 10);
+        mario.view.setTranslateY(Math.random() * 20 - 10);
+    }
+
+    private void updateDeathFlyAnimation() {
+        mario.x += deathVelocityX;
+        mario.y += deathVelocityY;
+
+        mario.view.setRotate(mario.view.getRotate() + deathRotateSpeed);
+
+        mario.render();
+
+        if (mario.y > GameConfig.WINDOW_HEIGHT + 100
+                || mario.y < -GameConfig.PLAYER_HEIGHT - 100
+                || mario.x < cameraX - 200
+                || mario.x > cameraX + GameConfig.WINDOW_WIDTH + 200) {
+
+            deathFlying = false;
+
+            mario.view.setRotate(0);
+            mario.view.setTranslateX(0);
+            mario.view.setTranslateY(0);
+
+            playDeathImageTransition();
+        }
+    }
+    private void playDeathImageTransition() {
+        respawning = true;
+
+        deathTransitionImage.toFront();
+        deathTransitionImage.setVisible(true);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), deathTransitionImage);
+        fadeIn.setToValue(1);
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), deathTransitionImage);
+
+        PauseTransition wait = new PauseTransition(Duration.seconds(1));
+
+
+
+        fadeOut.setToValue(0);
+
+        fadeIn.setOnFinished(e -> {
+            pause.play();
+        });
+
+        pause.setOnFinished(e -> {
+            fadeOut.play();
+
+            respawning = false;
+            respawnPlayer();
+        });
+
+        fadeOut.setOnFinished(e -> {
+            deathTransitionImage.setVisible(false);
+            Platform.runLater(() -> root.requestFocus());
+        });
+
+        fadeIn.play();
+        if (life <= 0) {
             gameFinished = true;
             if (timer != null) {timer.stop();}
             if (bgmPlayer != null) {bgmPlayer.stop();}
             SceneManager.switchScene("lose.fxml");
         }
-        else {
-            mario.x = saveX;
-            mario.y = saveY;
-            mario.velocityX = 0;
-            mario.velocityY = 0;
-//            死亡後鏡頭、攝影機直接切換到存檔點位置，避免玩家看不到角色
-//            cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
-//            world.setLayoutX(-cameraX);
-            mario.render();
-            keys.clear();
-        }
     }
+
+    private void respawnPlayer() {
+        mario.x = saveX;
+        mario.y = saveY;
+        mario.velocityX = 0;
+        mario.velocityY = 0;
+        mario.onGround = false;
+        mario.jumpLevel = 0;
+        mario.isDead = false;
+        cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
+        world.setLayoutX(-cameraX);
+
+        keys.clear();
+        mario.render();
+        mario.view.setRotate(0);
+        mario.view.setScaleX(1);
+        mario.view.setScaleY(1);
+        mario.view.setTranslateX(0);
+        mario.view.setTranslateY(0);
+    }
+
 
     // ================= 建立主角 =================
     private void createPlayer() {
@@ -499,11 +625,22 @@ public class SpecialController {
 
     // ================= 每幀更新 =================
     private void update() {
+        if (deathFlying) {
+            updateDeathFlyAnimation();
+            updateFPS();
+            return;
+        }
         handleInput();
         updateEntity(mario);
         updatePlayerSprite();
         for (Entity e : enemies){
             updateEntity(e);
+            if(isFirstEnemyShow){
+                if(e.x - cameraX < GameConfig.WINDOW_WIDTH){
+                    enemyBGMPlayer.play();
+                    isFirstEnemyShow = false;
+                }
+            }
         }
         updateCamera();
         mario.render();
@@ -516,62 +653,64 @@ public class SpecialController {
         checkCheckpoint();
         updateHUD();
         updateFPS();
-        if(mario.jumpLevel >4){
-            System.out.println(mario.jumpLevel);
-        }
+//        if(mario.jumpLevel >4){
+//            System.out.println(mario.jumpLevel);
+//        }
 
     }
 
     // ================= 讀取鍵盤輸入 =================
     private void handleInput() {
-        // A 鍵向左加速，Mario 不會超出左邊界
-        if (keys.contains(KeyCode.A)) {
-            mario.facingRight = false;
-            mario.velocityX -= GameConfig.ACCELERATION;
-        }
+        if (!mario.isDead) {
+            // A 鍵向左加速，Mario 不會超出左邊界
+            if (keys.contains(KeyCode.A)) {
+                mario.facingRight = false;
+                mario.velocityX -= GameConfig.ACCELERATION;
+            }
 
-        // D 鍵向右加速，Mario 不會超出地圖右邊界
-        if (keys.contains(KeyCode.D)){
-            mario.facingRight = true;
-            mario.velocityX += GameConfig.ACCELERATION;
-        }
+            // D 鍵向右加速，Mario 不會超出地圖右邊界
+            if (keys.contains(KeyCode.D)) {
+                mario.facingRight = true;
+                mario.velocityX += GameConfig.ACCELERATION;
+            }
 
-        // 沒有按左右鍵時，慢慢減速，產生滑行感
-        if (!keys.contains(KeyCode.A) && !keys.contains(KeyCode.D)) {
+            // 沒有按左右鍵時，慢慢減速，產生滑行感
+            if (!keys.contains(KeyCode.A) && !keys.contains(KeyCode.D)) {
 
-            if (mario.velocityX > 0) {
-                mario.velocityX -= GameConfig.FRICTION;
+                if (mario.velocityX > 0) {
+                    mario.velocityX -= GameConfig.FRICTION;
 
-                if (mario.velocityX < GameConfig.FRICTION) {
-                    mario.velocityX = 0;
+                    if (mario.velocityX < GameConfig.FRICTION) {
+                        mario.velocityX = 0;
+                    }
+                }
+
+                if (mario.velocityX < 0) {
+                    mario.velocityX += GameConfig.FRICTION;
+
+                    if (mario.velocityX > -GameConfig.FRICTION) {
+                        mario.velocityX = 0;
+                    }
                 }
             }
 
-            if (mario.velocityX < 0) {
-                mario.velocityX += GameConfig.FRICTION;
-
-                if (mario.velocityX > -GameConfig.FRICTION) {
-                    mario.velocityX = 0;
+            // SPACE 跳躍，利用 jumpLevel 實現長按大跳
+            if (keys.contains(KeyCode.SPACE) && (mario.onGround || (mario.jumpLevel > 0 && mario.jumpLevel < 4))) {
+                if (mario.jumpLevel == 0) {
+                    mario.onGround = false;
+                    playJumpSound();
                 }
-            }
-        }
+                mario.velocityY = GameConfig.JUMP_POWER;
+                mario.jumpLevel++;
 
-        // SPACE 跳躍，利用 jumpLevel 實現長按大跳
-        if (keys.contains(KeyCode.SPACE) && (mario.onGround || (mario.jumpLevel > 0 && mario.jumpLevel < 4))) {
-            if (mario.jumpLevel == 0){
-                mario.onGround = false;
-                playJumpSound();
             }
-            mario.velocityY = GameConfig.JUMP_POWER;
-            mario.jumpLevel++;
-
         }
     }
-
     // ================= Entity移動 =================
     private void updateEntity(Entity entity) {
         moveX(entity);
         moveY(entity);
+
     }
 
     private void updatePlayerSprite() {
@@ -860,15 +999,16 @@ public class SpecialController {
                 double enemyTop = enemy.y;
 
                 // Mario 正在往下掉，且腳底接近敵人頭頂，代表踩到敵人
-                if (mario.velocityY > 0 && marioBottom - enemyTop > 0 && marioBottom - enemyTop < 20) {
+                if (mario.velocityY > 0 && marioBottom - enemyTop > 0) {
                     playEnemyDeathAnimation(enemy);
                     enemies.remove(i);
-                    mario.velocityY = GameConfig.JUMP_POWER / 1.15;
+                    mario.velocityY = GameConfig.JUMP_POWER / 1.1;
 //                    mario.jumpLevel = 10; 忘記為啥這樣寫
                 }
                 else {
                     playerDead();
                 }
+                return;
             }
         }
     }
@@ -934,7 +1074,7 @@ public class SpecialController {
     }
 
     private void checkDeath() {
-        if (mario.y > GameConfig.WINDOW_HEIGHT + 200) {
+        if (mario.y > GameConfig.WINDOW_HEIGHT - GameConfig.PLAYER_HEIGHT/2) {
             playerDead();
         }
     }

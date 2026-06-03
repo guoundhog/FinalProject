@@ -356,10 +356,6 @@ public class ClassicController {
         mario.isDead = true;
         keys.clear();
         startDeathFlyAnimation();
-        updateDeathFlyAnimation();
-
-
-
     }
     private void startDeathFlyAnimation() {
         deathFlying = true;
@@ -368,8 +364,8 @@ public class ClassicController {
         mario.velocityX = 0;
         mario.velocityY = 0;
 
-        deathVelocityX = (Math.random() * 140) - 7;
-        deathVelocityY = -(Math.random() * 100 + 12);
+        deathVelocityX = (Math.random() * 50 -25) ;
+        deathVelocityY = -(Math.random() * 12 + 20);
         deathRotateSpeed = Math.random() * 50 + 10;
 
         if (Math.random() < 0.5) {
@@ -1078,7 +1074,7 @@ public class ClassicController {
     }
 
     private void checkDeath() {
-        if (mario.y > GameConfig.WINDOW_HEIGHT - GameConfig.PLAYER_HEIGHT) {
+        if (mario.y > GameConfig.WINDOW_HEIGHT - GameConfig.PLAYER_HEIGHT/2) {
             playerDead();
         }
     }
