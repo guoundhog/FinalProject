@@ -6,6 +6,7 @@ import javafx.scene.image.ImageView;
 public class Player extends Entity {
     public Image actorImage;
     public Image actorJumpImage;
+    public boolean isDead = false;
 
     public boolean facingRight = true;
     public int jumpLevel;

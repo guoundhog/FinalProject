@@ -6,6 +6,7 @@ import javafx.animation.TranslateTransition;
 import javafx.animation.RotateTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.FadeTransition;
+import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -46,6 +47,7 @@ public class ClassicController {
     private Image stone1;
     private Image stone2;
     private Image stone3;
+    private Image dangerStone;
     private Image hardBlockImage;
     private Image specialBlockImage;
     private Image bridgeImage;
@@ -54,13 +56,16 @@ public class ClassicController {
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
     private MediaPlayer landingPlayer;
+    private MediaPlayer enemyBGMPlayer;
 
     // ================= 設定選單 =================
     private VBox settingPane;
     private boolean settingOpen = false;
     private AnimationTimer timer;
     private boolean gameFinished = false;
-    private int life = 2; // 生命數
+    private ImageView deathTransitionImage;
+    private boolean respawning = false;
+    private int life = 3; // 生命數
     private double saveX = GameConfig.TILE_SIZE;
     private double saveY = GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT;
     private final List<ImageView> checkpoints = new ArrayList<>();
@@ -101,15 +106,15 @@ public class ClassicController {
 //BRIDGE = 7;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5 ,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5 ,5,5,5,5,5,5,5,5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
     };
 
     // ================= 初始化 =================
@@ -118,6 +123,7 @@ public class ClassicController {
         createMap();
         createPlayer();
         createFPSCounter();
+        createDeathTransitionImage();
         setupMusic();
         createSettingPane();
         setupKeyboard();
@@ -150,6 +156,14 @@ public class ClassicController {
         Media landing = new Media(getClass().getResource("/sound/pipe.mp3").toExternalForm());
         landingPlayer = new MediaPlayer(landing);
         landingPlayer.setVolume(0.7);
+
+
+
+
+
+        Media enemyBGM = new Media(getClass().getResource("/sound/enemyBGM.mp3").toExternalForm());
+        enemyBGMPlayer = new MediaPlayer(enemyBGM);
+        enemyBGMPlayer.setVolume(0.7);
     }
 
     private void playJumpSound() {
@@ -186,7 +200,6 @@ public class ClassicController {
         root.getChildren().add(fpsLabel);
 
 
-
         // 距離
         distanceLabel = new Label("Distance: 0 m");
 
@@ -215,6 +228,19 @@ public class ClassicController {
         lifeLabel.setLayoutY(20);
 
         root.getChildren().add(lifeLabel);
+    }
+
+    private void createDeathTransitionImage() {
+        Image img = new Image(getClass().getResourceAsStream("/image/deathTransition.jpg"));
+
+        deathTransitionImage = new ImageView(img);
+        deathTransitionImage.setFitWidth(GameConfig.WINDOW_WIDTH);
+        deathTransitionImage.setFitHeight(GameConfig.WINDOW_HEIGHT);
+        deathTransitionImage.setOpacity(0);
+        deathTransitionImage.setVisible(false);
+        deathTransitionImage.setMouseTransparent(true);
+
+        root.getChildren().add(deathTransitionImage);
     }
 
     private void updateFPS() {
@@ -318,26 +344,75 @@ public class ClassicController {
     }
 
     private void playerDead() {
-        life--;
+        if (respawning) {return;}
 
-        if (life <= -1) {
+        life--;
+        mario.isDead = true;
+
+        if (life <= 0) {
             gameFinished = true;
             if (timer != null) {timer.stop();}
             if (bgmPlayer != null) {bgmPlayer.stop();}
             SceneManager.switchScene("lose.fxml");
         }
         else {
-            mario.x = saveX;
-            mario.y = saveY;
-            mario.velocityX = 0;
-            mario.velocityY = 0;
-//            死亡後鏡頭、攝影機直接切換到存檔點位置，避免玩家看不到角色
-//            cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
-//            world.setLayoutX(-cameraX);
-            mario.render();
-            keys.clear();
+            playDeathImageTransition();
         }
     }
+
+    private void playDeathImageTransition() {
+        respawning = true;
+
+        deathTransitionImage.toFront();
+        deathTransitionImage.setVisible(true);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(0.5), deathTransitionImage);
+        fadeIn.setToValue(1);
+
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), deathTransitionImage);
+
+        PauseTransition wait = new PauseTransition(Duration.seconds(1));
+
+
+
+        fadeOut.setToValue(0);
+
+        fadeIn.setOnFinished(e -> {
+            pause.play();
+        });
+
+        pause.setOnFinished(e -> {
+            fadeOut.play();
+
+            respawning = false;
+            respawnPlayer();
+        });
+
+        fadeOut.setOnFinished(e -> {
+            deathTransitionImage.setVisible(false);
+            Platform.runLater(() -> root.requestFocus());
+        });
+
+        fadeIn.play();
+    }
+
+    private void respawnPlayer() {
+        mario.x = saveX;
+        mario.y = saveY;
+        mario.velocityX = 0;
+        mario.velocityY = 0;
+        mario.onGround = false;
+        mario.jumpLevel = 0;
+        mario.isDead = false;
+        cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
+        world.setLayoutX(-cameraX);
+
+        keys.clear();
+        mario.render();
+    }
+
 
     // ================= 建立主角 =================
     private void createPlayer() {
@@ -362,6 +437,7 @@ public class ClassicController {
         stone1 = new Image(getClass().getResourceAsStream("/image/stone1.png"));
         stone2 = new Image(getClass().getResourceAsStream("/image/stone2.png"));
         stone3 = new Image(getClass().getResourceAsStream("/image/stone3.png"));
+        dangerStone = new Image(getClass().getResourceAsStream("/image/dangerStone.png"));
         hardBlockImage = new Image(getClass().getResourceAsStream("/image/hardBlock.png"));
         specialBlockImage = new Image(getClass().getResourceAsStream("/image/grass_light.png"));
         bridgeImage = new Image(getClass().getResourceAsStream("/image/bridge.png"));
@@ -387,11 +463,20 @@ public class ClassicController {
 
                 // 石頭
                 else if (tile == GameConfig.STONE) {
-
                     block = new ImageView(stone0);
                     String key = row + "," + col;
                     breakableBlocks.put(key, block);
                     breakableBlockHp.put(key, GameConfig.STONE);
+                }
+                else if (tile == GameConfig.INVISIBLE_STONE) {
+                    block = new ImageView();
+                    String key = row + "," + col;
+                    breakableBlocks.put(key, block);
+                }
+                else if (tile == GameConfig.DANGER_STONE) {
+                    block = new ImageView(stone0);
+                    String key = row + "," + col;
+                    breakableBlocks.put(key, block);
                 }
                 else if (tile == GameConfig.HARD_BLOCK) {
                     block = new ImageView(hardBlockImage);
@@ -506,58 +591,59 @@ public class ClassicController {
         checkCheckpoint();
         updateHUD();
         updateFPS();
-        if(mario.jumpLevel >4){
-            System.out.println(mario.jumpLevel);
-        }
+//        if(mario.jumpLevel >4){
+//            System.out.println(mario.jumpLevel);
+//        }
 
     }
 
     // ================= 讀取鍵盤輸入 =================
     private void handleInput() {
-        // A 鍵向左加速，Mario 不會超出左邊界
-        if (keys.contains(KeyCode.A)) {
-            mario.facingRight = false;
-            mario.velocityX -= GameConfig.ACCELERATION;
-        }
+        if (!mario.isDead) {
+            // A 鍵向左加速，Mario 不會超出左邊界
+            if (keys.contains(KeyCode.A)) {
+                mario.facingRight = false;
+                mario.velocityX -= GameConfig.ACCELERATION;
+            }
 
-        // D 鍵向右加速，Mario 不會超出地圖右邊界
-        if (keys.contains(KeyCode.D)){
-            mario.facingRight = true;
-            mario.velocityX += GameConfig.ACCELERATION;
-        }
+            // D 鍵向右加速，Mario 不會超出地圖右邊界
+            if (keys.contains(KeyCode.D)) {
+                mario.facingRight = true;
+                mario.velocityX += GameConfig.ACCELERATION;
+            }
 
-        // 沒有按左右鍵時，慢慢減速，產生滑行感
-        if (!keys.contains(KeyCode.A) && !keys.contains(KeyCode.D)) {
+            // 沒有按左右鍵時，慢慢減速，產生滑行感
+            if (!keys.contains(KeyCode.A) && !keys.contains(KeyCode.D)) {
 
-            if (mario.velocityX > 0) {
-                mario.velocityX -= GameConfig.FRICTION;
+                if (mario.velocityX > 0) {
+                    mario.velocityX -= GameConfig.FRICTION;
 
-                if (mario.velocityX < GameConfig.FRICTION) {
-                    mario.velocityX = 0;
+                    if (mario.velocityX < GameConfig.FRICTION) {
+                        mario.velocityX = 0;
+                    }
+                }
+
+                if (mario.velocityX < 0) {
+                    mario.velocityX += GameConfig.FRICTION;
+
+                    if (mario.velocityX > -GameConfig.FRICTION) {
+                        mario.velocityX = 0;
+                    }
                 }
             }
 
-            if (mario.velocityX < 0) {
-                mario.velocityX += GameConfig.FRICTION;
-
-                if (mario.velocityX > -GameConfig.FRICTION) {
-                    mario.velocityX = 0;
+            // SPACE 跳躍，利用 jumpLevel 實現長按大跳
+            if (keys.contains(KeyCode.SPACE) && (mario.onGround || (mario.jumpLevel > 0 && mario.jumpLevel < 4))) {
+                if (mario.jumpLevel == 0) {
+                    mario.onGround = false;
+                    playJumpSound();
                 }
-            }
-        }
+                mario.velocityY = GameConfig.JUMP_POWER;
+                mario.jumpLevel++;
 
-        // SPACE 跳躍，利用 jumpLevel 實現長按大跳
-        if (keys.contains(KeyCode.SPACE) && (mario.onGround || (mario.jumpLevel > 0 && mario.jumpLevel < 4))) {
-            if (mario.jumpLevel == 0){
-                mario.onGround = false;
-                playJumpSound();
             }
-            mario.velocityY = GameConfig.JUMP_POWER;
-            mario.jumpLevel++;
-
         }
     }
-
     // ================= Entity移動 =================
     private void updateEntity(Entity entity) {
         moveX(entity);
@@ -589,6 +675,20 @@ public class ClassicController {
         if (map[row][col] == GameConfig.HARD_BLOCK) {
             mario.velocityY = 0;
 //            mario.velocityY = -mario.velocityY;
+            return;
+        }
+
+        if (map[row][col] == GameConfig.INVISIBLE_STONE) {
+            mario.velocityY = 0;
+            ImageView block = breakableBlocks.get(row + "," + col);
+            block.setImage(stone0);
+            return;
+        }
+
+        if (map[row][col] == GameConfig.DANGER_STONE) {
+            mario.velocityY = 0;
+            ImageView block = breakableBlocks.get(row + "," + col);
+            block.setImage(dangerStone);
             return;
         }
 
@@ -705,6 +805,8 @@ public class ClassicController {
         // 代表可碰撞地板
         return map[row][col] == GameConfig.GROUND
                 || map[row][col] == GameConfig.STONE
+                || map[row][col] == GameConfig.INVISIBLE_STONE
+                || map[row][col] == GameConfig.DANGER_STONE
                 || map[row][col] == GameConfig.HARD_BLOCK
                 || map[row][col] == GameConfig.SPECIAL_BLOCK;
     }
@@ -834,15 +936,16 @@ public class ClassicController {
                 double enemyTop = enemy.y;
 
                 // Mario 正在往下掉，且腳底接近敵人頭頂，代表踩到敵人
-                if (mario.velocityY > 0 && marioBottom - enemyTop > 0 && marioBottom - enemyTop < 20) {
+                if (mario.velocityY > 0 && marioBottom - enemyTop > 0) {
                     playEnemyDeathAnimation(enemy);
                     enemies.remove(i);
-                    mario.velocityY = GameConfig.JUMP_POWER / 1.15;
+                    mario.velocityY = GameConfig.JUMP_POWER / 1.1;
 //                    mario.jumpLevel = 10; 忘記為啥這樣寫
                 }
                 else {
                     playerDead();
                 }
+                return;
             }
         }
     }
