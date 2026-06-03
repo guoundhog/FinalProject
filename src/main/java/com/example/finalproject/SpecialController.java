@@ -121,8 +121,8 @@ public class SpecialController {
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,11,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 1,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
             {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
@@ -830,6 +830,15 @@ public class SpecialController {
         breakableBlockHp.put(key, hp);
     }
 
+    private void hitDangerBlock(int row, int col){
+        if(moveMap[row][col] == GameConfig.DANGER_STONE){
+            playerDead();
+            ImageView block = breakableBlocks.get(row + "," + col);
+            block.setImage(dangerStone);
+        }
+        else return;
+    }
+
     private void playBlockHitAnimation(int row, int col) {
         String key = row + "," + col;
         ImageView block = breakableBlocks.get(key);
@@ -933,14 +942,18 @@ public class SpecialController {
 
         //遍歷周圍格子
         for (int ty = top; ty <= bottom; ty++){
+
             if (isSolidTile(left, ty) && entity.velocityX < 0){
+                hitDangerBlock(ty, left);
                 entity.x = (left + 1) * GameConfig.TILE_SIZE;
                 if (entity instanceof Enemy enemy){
                     enemy.velocityX *= -1;
                 }else {
                     entity.velocityX = 0;
+                    ;
                 }
             }else if (isSolidTile(right, ty) && entity.velocityX > 0) {
+                hitDangerBlock(ty, right);
                 entity.x = right * GameConfig.TILE_SIZE - GameConfig.PLAYER_WIDTH;
                 if (entity instanceof Enemy enemy){
                     enemy.velocityX *= -1;
@@ -966,15 +979,17 @@ public class SpecialController {
                 entity.velocityY = 0;
 
                 if (entity instanceof Player player) {
-
                     player.jumpLevel = 4;
                     if(isSolidTile(mid, top) || isInvisible(mid, top) ) {
+                        hitDangerBlock(top, mid);
                         hitBlockFromBelow(top, mid);
                     }
                     else if (isSolidTile(left, top)  || isInvisible(left, top)) {
+                        hitDangerBlock(top, left);
                         hitBlockFromBelow(top, left);
                     }
                     else {
+                        hitDangerBlock(top, right);
                         hitBlockFromBelow(top, right);
                     }
                 }
@@ -987,7 +1002,12 @@ public class SpecialController {
         // 往下落
         else if (entity.velocityY > 0) {
             if (isSolidTile(left, bottom) || isSolidTile(right, bottom) || isBridge(left, bottom) || isBridge(right, bottom)) {
-
+                if(isSolidTile(left, bottom)){
+                    hitDangerBlock(bottom, left);
+                }
+                else if(isSolidTile(right, bottom)){
+                    hitDangerBlock(bottom, right);
+                }
                 entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
                 entity.velocityY = 0;
 
