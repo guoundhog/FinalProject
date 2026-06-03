@@ -45,4 +45,9 @@ public class GameConfig {
     public static final int ENEMY_WIDTH = 50;
     public static final int ENEMY_HEIGHT = 50;
     public static final double ENEMY_SPEED = 2.5;
+
+    // =============== DOG DETAIL =================
+    public static final int DOG = 12;
+    public static final int DOG_RANGETAIL = 5;
+    public static final double DOG_SPEED = 18;
 }

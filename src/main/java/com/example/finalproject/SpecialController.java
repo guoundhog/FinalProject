@@ -38,6 +38,10 @@ public class SpecialController {
     // ================= 遊戲物件 =================
     private Player mario;
     private final List<Enemy> enemies = new ArrayList<>();
+    private final List<Enemy> dogs = new ArrayList<>();
+    private MediaPlayer dogPlayer;
+    private MediaPlayer dog2Player;
+    private boolean dogSoundPlayed = false;
     private ImageView goal;
     private final Map<String, ImageView> breakableBlocks = new HashMap<>();
     private final Map<String, Integer> breakableBlockHp = new HashMap<>();
@@ -123,10 +127,10 @@ public class SpecialController {
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,11,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 1,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 1,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
             {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
     };
     private int[][] moveMap = new int[map.length][];
@@ -181,6 +185,14 @@ public class SpecialController {
         Media enemyBGM = new Media(getClass().getResource("/sound/enemyBGM.mp3").toExternalForm());
         enemyBGMPlayer = new MediaPlayer(enemyBGM);
         enemyBGMPlayer.setVolume(0.7);
+
+        Media dogSound = new Media(getClass().getResource("/sound/dog.mp3").toExternalForm());
+        dogPlayer = new MediaPlayer(dogSound);
+        dogPlayer.setVolume(0.8);
+
+        Media dog2Sound = new Media(getClass().getResource("/sound/dog2.mp3").toExternalForm());
+        dog2Player = new MediaPlayer(dog2Sound);
+        dog2Player.setVolume(0.8);
     }
 
     private void playJumpSound() {
@@ -485,8 +497,12 @@ public class SpecialController {
         world.getChildren().clear();
 
         enemies.clear();
+        dogs.clear();
+
         breakableBlocks.clear();
         breakableBlockHp.clear();
+
+        dogSoundPlayed = false;
 
         goal = null;
         checkpoint = null;
@@ -515,6 +531,19 @@ public class SpecialController {
         Enemy enemy = new Enemy(x, y);
         enemies.add(enemy);
         world.getChildren().add(enemy.view);
+    }
+
+    private void createDog(double x, double y) {
+        Enemy dog = new Enemy(x, y);
+
+        dog.velocityX = 0;
+        dog.velocityY = 0;
+
+        Image img = new Image(getClass().getResourceAsStream("/image/cuteDog.png"));
+        dog.view.setImage(img);
+
+        dogs.add(dog);
+        world.getChildren().add(dog.view);
     }
 
     // ================= 建立地圖 =================
@@ -581,6 +610,10 @@ public class SpecialController {
                     createEnemy(col * GameConfig.TILE_SIZE, (row+1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT) ;
 //                    createEnemy(col * GameConfig.TILE_SIZE, (row) * GameConfig.TILE_SIZE-50);
 //                    System.out.println("enemy created at " + col * GameConfig.TILE_SIZE + ", " + ( (row) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT));
+                    moveMap[row][col] = GameConfig.AIR;
+                }
+                else if (tile == GameConfig.DOG) {
+                    createDog(col * GameConfig.TILE_SIZE, (row + 1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT);
                     moveMap[row][col] = GameConfig.AIR;
                 }
                 else if (tile == GameConfig.CHECKPOINT) {
@@ -685,6 +718,7 @@ public class SpecialController {
                 }
             }
         }
+        updateDogs();
         updateCamera();
         mario.render();
         for (Entity e : enemies){
@@ -1114,6 +1148,51 @@ public class SpecialController {
             fallingFakeBlockVelocityY.remove(key);
         }
     }
+
+    private void updateDogs() {
+        for (Enemy dog : dogs) {
+
+            boolean dogInScreen =
+                    dog.x - cameraX < GameConfig.WINDOW_WIDTH &&
+                            dog.x - cameraX + dog.width > 0;
+
+            if (dogInScreen && !dogSoundPlayed) {
+                dogPlayer.stop();
+                dogPlayer.play();
+                dogSoundPlayed = true;
+            }
+
+            double diffX = Math.abs(dog.x - mario.x);
+            double diffY = Math.abs(dog.y - mario.y);
+
+            if (diffY < GameConfig.TILE_SIZE && diffX < GameConfig.TILE_SIZE * GameConfig.DOG_RANGETAIL) {
+
+                if (mario.x < dog.x) {
+                    dog.velocityX = -GameConfig.DOG_SPEED;
+
+                    // 狗往左衝，面朝左
+                    dog.view.setScaleX(-1);
+                }
+                else {
+                    dog.velocityX = GameConfig.DOG_SPEED;
+
+                    // 狗往右衝，面朝右
+                    dog.view.setScaleX(1);
+                }
+            }
+            else {
+                if(dog.velocityX != 0 && dog.velocityX > 0) {
+                    dog.velocityX--;
+                }
+                else if(dog.velocityX != 0 && dog.velocityX < 0) {
+                    dog.velocityX++;
+                }
+            }
+
+            updateEntity(dog);
+            dog.render();
+        }
+    }
     // ================= 攝影機系統 =================
     private void updateCamera() {
         // Mario 尚未走到指定位置前，鏡頭不移動
@@ -1149,6 +1228,14 @@ public class SpecialController {
                 else {
                     playerDead();
                 }
+                return;
+            }
+        }
+        for (int i = dogs.size() - 1; i >= 0; i--) {
+            Enemy dog = dogs.get(i);
+
+            if (mario.view.getBoundsInParent().intersects(dog.view.getBoundsInParent())) {
+                playerDead();
                 return;
             }
         }
