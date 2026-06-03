@@ -75,6 +75,12 @@ public class ClassicController {
     private ImageView checkpoint;
     private boolean checkpointActivated = false;
 
+    private boolean isFirstEnemyShow = true;
+
+    private boolean deathFlying = false;
+    private double deathVelocityX;
+    private double deathVelocityY;
+    private double deathRotateSpeed;
     // ================= FPS 顯示 =================
     private Label fpsLabel;
     private Label distanceLabel;
@@ -106,15 +112,15 @@ public class ClassicController {
 //BRIDGE = 7;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5 ,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5 ,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5 ,5,5,5,5,5,5,5,5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
     };
 
     // ================= 初始化 =================
@@ -344,22 +350,60 @@ public class ClassicController {
     }
 
     private void playerDead() {
-        if (respawning) {return;}
+        if (respawning || mario.isDead) {return;}
 
         life--;
         mario.isDead = true;
+        keys.clear();
+        startDeathFlyAnimation();
+        updateDeathFlyAnimation();
 
-        if (life <= 0) {
-            gameFinished = true;
-            if (timer != null) {timer.stop();}
-            if (bgmPlayer != null) {bgmPlayer.stop();}
-            SceneManager.switchScene("lose.fxml");
+
+
+    }
+    private void startDeathFlyAnimation() {
+        deathFlying = true;
+
+        keys.clear();
+        mario.velocityX = 0;
+        mario.velocityY = 0;
+
+        deathVelocityX = (Math.random() * 140) - 7;
+        deathVelocityY = -(Math.random() * 100 + 12);
+        deathRotateSpeed = Math.random() * 50 + 10;
+
+        if (Math.random() < 0.5) {
+            deathRotateSpeed = -deathRotateSpeed;
         }
-        else {
+
+        mario.view.setRotate(0);
+
+        mario.view.setTranslateX(Math.random() * 20 - 10);
+        mario.view.setTranslateY(Math.random() * 20 - 10);
+    }
+
+    private void updateDeathFlyAnimation() {
+        mario.x += deathVelocityX;
+        mario.y += deathVelocityY;
+
+        mario.view.setRotate(mario.view.getRotate() + deathRotateSpeed);
+
+        mario.render();
+
+        if (mario.y > GameConfig.WINDOW_HEIGHT + 100
+                || mario.y < -GameConfig.PLAYER_HEIGHT - 100
+                || mario.x < cameraX - 200
+                || mario.x > cameraX + GameConfig.WINDOW_WIDTH + 200) {
+
+            deathFlying = false;
+
+            mario.view.setRotate(0);
+            mario.view.setTranslateX(0);
+            mario.view.setTranslateY(0);
+
             playDeathImageTransition();
         }
     }
-
     private void playDeathImageTransition() {
         respawning = true;
 
@@ -396,6 +440,12 @@ public class ClassicController {
         });
 
         fadeIn.play();
+        if (life <= 0) {
+            gameFinished = true;
+            if (timer != null) {timer.stop();}
+            if (bgmPlayer != null) {bgmPlayer.stop();}
+            SceneManager.switchScene("lose.fxml");
+        }
     }
 
     private void respawnPlayer() {
@@ -411,6 +461,11 @@ public class ClassicController {
 
         keys.clear();
         mario.render();
+        mario.view.setRotate(0);
+        mario.view.setScaleX(1);
+        mario.view.setScaleY(1);
+        mario.view.setTranslateX(0);
+        mario.view.setTranslateY(0);
     }
 
 
@@ -574,11 +629,22 @@ public class ClassicController {
 
     // ================= 每幀更新 =================
     private void update() {
+        if (deathFlying) {
+            updateDeathFlyAnimation();
+            updateFPS();
+            return;
+        }
         handleInput();
         updateEntity(mario);
         updatePlayerSprite();
         for (Entity e : enemies){
             updateEntity(e);
+            if(isFirstEnemyShow){
+                if(e.x - cameraX < GameConfig.WINDOW_WIDTH){
+                    enemyBGMPlayer.play();
+                    isFirstEnemyShow = false;
+                }
+            }
         }
         updateCamera();
         mario.render();
@@ -648,6 +714,7 @@ public class ClassicController {
     private void updateEntity(Entity entity) {
         moveX(entity);
         moveY(entity);
+
     }
 
     private void updatePlayerSprite() {
@@ -1011,7 +1078,7 @@ public class ClassicController {
     }
 
     private void checkDeath() {
-        if (mario.y > GameConfig.WINDOW_HEIGHT + 200) {
+        if (mario.y > GameConfig.WINDOW_HEIGHT - GameConfig.PLAYER_HEIGHT) {
             playerDead();
         }
     }
