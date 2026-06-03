@@ -103,14 +103,18 @@ public class ClassicController {
     // 上一幀時間
     private long lastFrameTime = 0;
 
-// 0 = 空氣
-// 1 = 地板
-// 4 = 石頭
-// 9 = 終點
-//ENEMY = 8;
-//HARD_BLOCK = 5;
-//SPECIAL_BLOCK = 6;
-//BRIDGE = 7;
+//    public static final int AIR = 0;
+//    public static final int GROUND = 1;
+//    public static final int INVISIBLE_STONE = 2;
+//    public static final int FAKE_GROUND = 3;
+//    public static final int STONE = 4;
+//    public static final int HARD_BLOCK = 5;
+//    public static final int SPECIAL_BLOCK = 6;
+//    public static final int BRIDGE = 7;
+//    public static final int ENEMY = 8;
+//    public static final int GOAL = 9;
+//    public static final int CHECKPOINT = 10;
+//    public static final int DANGER_STONE = 11;
 
     private final int[][] map = {
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},

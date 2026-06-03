@@ -31,6 +31,8 @@ public class GameConfig {
 
     public static final int AIR = 0;
     public static final int GROUND = 1;
+    public static final int INVISIBLE_STONE = 2;
+    public static final int FAKE_GROUND = 3;
     public static final int STONE = 4;
     public static final int HARD_BLOCK = 5;
     public static final int SPECIAL_BLOCK = 6;
@@ -38,8 +40,7 @@ public class GameConfig {
     public static final int ENEMY = 8;
     public static final int GOAL = 9;
     public static final int CHECKPOINT = 10;
-    public static final int INVISIBLE_STONE = 11;
-    public static final int DANGER_STONE = 12;
+    public static final int DANGER_STONE = 11;
 // =============== ENEMY DETAIL =================
     public static final int ENEMY_WIDTH = 50;
     public static final int ENEMY_HEIGHT = 50;

@@ -56,6 +56,7 @@ public class SpecialController {
     private MediaPlayer bgmPlayer;
     private MediaPlayer jumpPlayer;
     private MediaPlayer landingPlayer;
+    private MediaPlayer breakingPlayer;
     private MediaPlayer enemyBGMPlayer;
 
     // ================= 設定選單 =================
@@ -102,29 +103,37 @@ public class SpecialController {
     // 上一幀時間
     private long lastFrameTime = 0;
 
-// 0 = 空氣
-// 1 = 地板
-// 4 = 石頭
-// 9 = 終點
-//ENEMY = 8;
-//HARD_BLOCK = 5;
-//SPECIAL_BLOCK = 6;
-//BRIDGE = 7;
+//    public static final int AIR = 0;
+//    public static final int GROUND = 1;
+//    public static final int INVISIBLE_STONE = 2;
+//    public static final int FAKE_GROUND = 3;
+//    public static final int STONE = 4;
+//    public static final int HARD_BLOCK = 5;
+//    public static final int SPECIAL_BLOCK = 6;
+//    public static final int BRIDGE = 7;
+//    public static final int ENEMY = 8;
+//    public static final int GOAL = 9;
+//    public static final int CHECKPOINT = 10;
+//    public static final int DANGER_STONE = 11;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,12,0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5,0,11,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 1,12,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0, 0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,9,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,5,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 1,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
     };
+    private int[][] moveMap = new int[map.length][];
 
     // ================= 初始化 =================
     public void initialize() {
+        for (int i = 0; i < map.length; i++) {
+            moveMap[i] = map[i].clone();
+        }
         createBackground();
         createMap();
         createPlayer();
@@ -163,9 +172,9 @@ public class SpecialController {
         landingPlayer = new MediaPlayer(landing);
         landingPlayer.setVolume(0.7);
 
-
-
-
+        Media breaking = new Media(getClass().getResource("/sound/breaking.mp3").toExternalForm());
+        breakingPlayer = new MediaPlayer(breaking);
+        breakingPlayer.setVolume(0.7);
 
         Media enemyBGM = new Media(getClass().getResource("/sound/enemyBGM.mp3").toExternalForm());
         enemyBGMPlayer = new MediaPlayer(enemyBGM);
@@ -188,6 +197,14 @@ public class SpecialController {
         // 先 stop 再 play，避免連續落地時音效播不出來
         landingPlayer.stop();
         landingPlayer.play();
+    }
+    private void playbreakingSound() {
+        if (breakingPlayer == null) {
+            return;
+        }
+        // 先 stop 再 play，避免連續落地時音效播不出來
+        breakingPlayer.stop();
+        breakingPlayer.play();
     }
 
     // ================= FPS 顯示 =================
@@ -445,6 +462,8 @@ public class SpecialController {
     }
 
     private void respawnPlayer() {
+        resetLevelKeepCheckpoint();
+
         mario.x = saveX;
         mario.y = saveY;
         mario.velocityX = 0;
@@ -452,19 +471,35 @@ public class SpecialController {
         mario.onGround = false;
         mario.jumpLevel = 0;
         mario.isDead = false;
+
         cameraX = Math.max(GameConfig.TILE_SIZE, saveX - 380);
         world.setLayoutX(-cameraX);
 
         keys.clear();
         mario.render();
-        mario.view.setRotate(0);
-        mario.view.setScaleX(1);
-        mario.view.setScaleY(1);
-        mario.view.setTranslateX(0);
-        mario.view.setTranslateY(0);
     }
 
+    private void resetLevelKeepCheckpoint() {
+        world.getChildren().clear();
 
+        enemies.clear();
+        breakableBlocks.clear();
+        breakableBlockHp.clear();
+
+        goal = null;
+        checkpoint = null;
+
+        createMap();
+        createPlayer();
+        for (int i = 0; i < map.length; i++) {
+            moveMap[i] = map[i].clone();
+        }
+        if (checkpointActivated && checkpoint != null) {
+            checkpoint.setImage(checkedpointImage);
+        }
+
+        fixLayerOrder();
+    }
     // ================= 建立主角 =================
     private void createPlayer() {
         // 主角起始 X 座標，讓角色直接站在地板上
@@ -525,7 +560,7 @@ public class SpecialController {
                     breakableBlocks.put(key, block);
                 }
                 else if (tile == GameConfig.DANGER_STONE) {
-                    block = new ImageView(stone0);
+                    block = new ImageView(hardBlockImage);
                     String key = row + "," + col;
                     breakableBlocks.put(key, block);
                 }
@@ -544,7 +579,7 @@ public class SpecialController {
                     createEnemy(col * GameConfig.TILE_SIZE, (row+1) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT) ;
 //                    createEnemy(col * GameConfig.TILE_SIZE, (row) * GameConfig.TILE_SIZE-50);
 //                    System.out.println("enemy created at " + col * GameConfig.TILE_SIZE + ", " + ( (row) * GameConfig.TILE_SIZE - GameConfig.ENEMY_HEIGHT));
-                    map[row][col] = GameConfig.AIR;
+                    moveMap[row][col] = GameConfig.AIR;
                 }
                 else if (tile == GameConfig.CHECKPOINT) {
                     checkpoint = new ImageView(checkpointImage);
@@ -735,41 +770,41 @@ public class SpecialController {
     }
 
     private void hitBlockFromBelow(int row, int col) {
-        if (map[row][col] == GameConfig.HARD_BLOCK) {
+        if (moveMap[row][col] == GameConfig.HARD_BLOCK) {
             mario.velocityY = 0;
 //            mario.velocityY = -mario.velocityY;
             return;
         }
 
-        if (map[row][col] == GameConfig.INVISIBLE_STONE) {
+        if (moveMap[row][col] == GameConfig.INVISIBLE_STONE) {
             mario.velocityY = 0;
             ImageView block = breakableBlocks.get(row + "," + col);
-            block.setImage(stone0);
+            block.setImage(hardBlockImage);
+            moveMap[row][col] = GameConfig.HARD_BLOCK;
             return;
         }
 
-        if (map[row][col] == GameConfig.DANGER_STONE) {
-            mario.velocityY = 0;
+        if (moveMap[row][col] == GameConfig.DANGER_STONE) {
+            playerDead();
             ImageView block = breakableBlocks.get(row + "," + col);
             block.setImage(dangerStone);
             return;
         }
 
-        if (map[row][col] == GameConfig.SPECIAL_BLOCK) {
+        if (moveMap[row][col] == GameConfig.SPECIAL_BLOCK) {
             spawnSpecialItem(row, col);
-            map[row][col] = GameConfig.AIR;
+            moveMap[row][col] = GameConfig.AIR;
             removeBlockAt(row, col);
             return;
         }
 
-        if (map[row][col] != GameConfig.STONE) {
+        if (moveMap[row][col] != GameConfig.STONE) {
             return;
         }
         playBlockHitAnimation(row, col);
         String key = row + "," + col;
-
+        playbreakingSound();
         int hp = breakableBlockHp.get(key);
-
         hp--;
 
         if (hp == 3) {
@@ -789,7 +824,7 @@ public class SpecialController {
             breakableBlocks.remove(key);
             breakableBlockHp.remove(key);
 
-            map[row][col] = 0;
+            moveMap[row][col] = 0;
         }
 
         breakableBlockHp.put(key, hp);
@@ -866,21 +901,27 @@ public class SpecialController {
             return false;
         }
         // 代表可碰撞地板
-        return map[row][col] == GameConfig.GROUND
-                || map[row][col] == GameConfig.STONE
-                || map[row][col] == GameConfig.INVISIBLE_STONE
-                || map[row][col] == GameConfig.DANGER_STONE
-                || map[row][col] == GameConfig.HARD_BLOCK
-                || map[row][col] == GameConfig.SPECIAL_BLOCK;
+        return moveMap[row][col] == GameConfig.GROUND
+                || moveMap[row][col] == GameConfig.STONE
+                || moveMap[row][col] == GameConfig.DANGER_STONE
+                || moveMap[row][col] == GameConfig.HARD_BLOCK
+                || moveMap[row][col] == GameConfig.SPECIAL_BLOCK;
     }
-
+    private boolean isInvisible(int col, int row) {
+        // 超出地圖範圍就當成不能碰撞
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
+            return false;
+        }
+        // 代表可碰撞地板
+        return  moveMap[row][col] == GameConfig.INVISIBLE_STONE;
+    }
     private boolean isBridge(int col, int row) {
         // 超出地圖範圍就當成不能碰撞
         if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
             return false;
         }
         // 代表可碰撞地板
-        return map[row][col] == GameConfig.BRIDGE;
+        return moveMap[row][col] == GameConfig.BRIDGE;
     }
 
     private void handleXCollision(Entity entity) {
@@ -919,7 +960,7 @@ public class SpecialController {
 
         // 往上撞
         if (entity.velocityY < 0) {
-            if (isSolidTile(left, top) || isSolidTile(right, top)) {
+            if (isSolidTile(left, top) || isSolidTile(right, top) || isInvisible(right, top)  || isInvisible(left, top)) {
 
                 entity.y = (top + 1) * GameConfig.TILE_SIZE;
                 entity.velocityY = 0;
@@ -927,10 +968,10 @@ public class SpecialController {
                 if (entity instanceof Player player) {
 
                     player.jumpLevel = 4;
-                    if(isSolidTile(mid, top)) {
+                    if(isSolidTile(mid, top) || isInvisible(mid, top) ) {
                         hitBlockFromBelow(top, mid);
                     }
-                    else if (isSolidTile(left, top)) {
+                    else if (isSolidTile(left, top)  || isInvisible(left, top)) {
                         hitBlockFromBelow(top, left);
                     }
                     else {
