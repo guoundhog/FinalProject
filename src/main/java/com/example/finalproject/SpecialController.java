@@ -41,6 +41,12 @@ public class SpecialController {
     private final List<Enemy> dogs = new ArrayList<>();
     private MediaPlayer dogPlayer;
     private MediaPlayer dog2Player;
+    private int killedNumber = 0;
+    private MediaPlayer shoot1Player;
+    private MediaPlayer shoot2Player;
+    private MediaPlayer shoot3Player;
+    private MediaPlayer shoot4Player;
+    private MediaPlayer shoot5Player;
     private boolean dogSoundPlayed = false;
     private ImageView goal;
     private final Map<String, ImageView> breakableBlocks = new HashMap<>();
@@ -116,23 +122,23 @@ public class SpecialController {
 //    public static final int FAKE_GROUND = 3;
 //    public static final int STONE = 4;
 //    public static final int HARD_BLOCK = 5;
-//    public static final int SPECIAL_BLOCK = 6;
+//    public static final int DANGER_STONE = 6;
 //    public static final int BRIDGE = 7;
 //    public static final int ENEMY = 8;
 //    public static final int GOAL = 9;
 //    public static final int CHECKPOINT = 10;
-//    public static final int DANGER_STONE = 11;
+//    public static final int SPECIAL_BLOCK = 11;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,4,8,8,8,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,2,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5, 0,2,0,0,0,0,0,0,0,0,5,7,7,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,5,0,2,2,2,2, 5,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 5,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,5,0,0,0,0, 5,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1, 1,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,0,1,1,1,1,12,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0, 0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0, 0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,9,0,0,5},
+            {5,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,2,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5,0,2,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0, 0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,5,0,2,2,2,2, 5,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 5,11,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,5,0,0,0,0, 5,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1, 1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,0,1,1,1,1,12,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}
     };
     private int[][] moveMap = new int[map.length][];
 
@@ -200,8 +206,27 @@ public class SpecialController {
                 dog2Player.seek(Duration.ZERO);
                 dog2Player.pause();
             }
-        });
 
+        });
+        Media shoot1 = new Media(getClass().getResource("/sound/shoot1.m4a").toExternalForm());
+        shoot1Player = new MediaPlayer(shoot1);
+        shoot1Player.setVolume(0.7);
+
+        Media shoot2 = new Media(getClass().getResource("/sound/shoot2.m4a").toExternalForm());
+        shoot2Player = new MediaPlayer(shoot2);
+        shoot2Player.setVolume(0.7);
+
+        Media shoot3 = new Media(getClass().getResource("/sound/shoot3.m4a").toExternalForm());
+        shoot3Player = new MediaPlayer(shoot3);
+        shoot3Player.setVolume(0.7);
+
+        Media shoot4 = new Media(getClass().getResource("/sound/shoot4.m4a").toExternalForm());
+        shoot4Player = new MediaPlayer(shoot4);
+        shoot4Player.setVolume(0.7);
+
+        Media shoot5 = new Media(getClass().getResource("/sound/shoot5.m4a").toExternalForm());
+        shoot5Player = new MediaPlayer(shoot5);
+        shoot5Player.setVolume(0.7);
         Media gameOverBGM = new Media(getClass().getResource("/sound/nima.mp3").toExternalForm());
         gameOverBGMPlayer = new MediaPlayer(gameOverBGM);
         gameOverBGMPlayer.setVolume(0.7);
@@ -517,7 +542,7 @@ public class SpecialController {
         breakableBlockHp.clear();
 
         dogSoundPlayed = false;
-
+        killedNumber = 0;
         goal = null;
         checkpoint = null;
 
@@ -848,6 +873,17 @@ public class SpecialController {
             playerDead();
             ImageView block = breakableBlocks.get(row + "," + col);
             block.setImage(dangerStone);
+
+            double centerX = block.getLayoutX() + block.getFitWidth() / 2.0;
+            double centerY = block.getLayoutY() + block.getFitHeight() / 2.0;
+
+            double scale = 1.25; // 放大倍率
+
+            block.setFitWidth(GameConfig.TILE_SIZE * scale);
+            block.setFitHeight(GameConfig.TILE_SIZE * scale);
+
+            block.setLayoutX(centerX - block.getFitWidth() / 2.0);
+            block.setLayoutY(centerY - block.getFitHeight() / 2.0);
             return;
         }
 
@@ -895,6 +931,17 @@ public class SpecialController {
             playerDead();
             ImageView block = breakableBlocks.get(row + "," + col);
             block.setImage(dangerStone);
+
+            double centerX = block.getLayoutX() + block.getFitWidth() / 2.0;
+            double centerY = block.getLayoutY() + block.getFitHeight() / 2.0;
+
+            double scale = 1.25; // 放大倍率
+
+            block.setFitWidth(GameConfig.TILE_SIZE * scale);
+            block.setFitHeight(GameConfig.TILE_SIZE * scale);
+
+            block.setLayoutX(centerX - block.getFitWidth() / 2.0);
+            block.setLayoutY(centerY - block.getFitHeight() / 2.0);
         }
         else return;
     }
@@ -1269,6 +1316,24 @@ public class SpecialController {
     }
 
     private void playEnemyDeathAnimation(Enemy enemy) {
+        killedNumber++;
+        if(killedNumber < 6 ){
+            if(killedNumber == 1){
+                shoot1Player.play();
+            }
+            else if(killedNumber == 2){
+                shoot2Player.play();
+            }
+            else if(killedNumber == 3){
+                shoot3Player.play();
+            }
+            else if(killedNumber == 4){
+                shoot4Player.play();
+            }
+            else if(killedNumber == 5){
+                shoot5Player.play();
+            }
+        }
         ScaleTransition grow = new ScaleTransition(Duration.millis(80), enemy.view);
         grow.setToX(1.4);
         grow.setToY(1.4);
