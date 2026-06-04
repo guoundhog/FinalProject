@@ -210,22 +210,63 @@ public class SpecialController {
         Media shoot1 = new Media(getClass().getResource("/sound/shoot1.m4a").toExternalForm());
         shoot1Player = new MediaPlayer(shoot1);
         shoot1Player.setVolume(0.7);
+        shoot1Player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                shoot1Player.seek(Duration.ZERO);
+                shoot1Player.pause();
+            }
+
+        });
 
         Media shoot2 = new Media(getClass().getResource("/sound/shoot2.m4a").toExternalForm());
         shoot2Player = new MediaPlayer(shoot2);
         shoot2Player.setVolume(0.7);
+        shoot2Player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                shoot2Player.seek(Duration.ZERO);
+                shoot2Player.pause();
+            }
+
+        });
 
         Media shoot3 = new Media(getClass().getResource("/sound/shoot3.m4a").toExternalForm());
         shoot3Player = new MediaPlayer(shoot3);
         shoot3Player.setVolume(0.7);
+        shoot3Player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                shoot3Player.seek(Duration.ZERO);
+                shoot3Player.pause();
+            }
+
+        });
 
         Media shoot4 = new Media(getClass().getResource("/sound/shoot4.m4a").toExternalForm());
         shoot4Player = new MediaPlayer(shoot4);
         shoot4Player.setVolume(0.7);
+        shoot4Player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                shoot4Player.seek(Duration.ZERO);
+                shoot4Player.pause();
+            }
+
+        });
 
         Media shoot5 = new Media(getClass().getResource("/sound/shoot5.m4a").toExternalForm());
         shoot5Player = new MediaPlayer(shoot5);
         shoot5Player.setVolume(0.7);
+        shoot5Player.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                shoot5Player.seek(Duration.ZERO);
+                shoot5Player.pause();
+            }
+
+        });
+
         Media gameOverBGM = new Media(getClass().getResource("/sound/nima.mp3").toExternalForm());
         gameOverBGMPlayer = new MediaPlayer(gameOverBGM);
         gameOverBGMPlayer.setVolume(0.7);
