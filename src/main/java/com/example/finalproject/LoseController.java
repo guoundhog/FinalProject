@@ -16,11 +16,11 @@ public class LoseController {
     public void initialize() {
         // 設定按鈕事件
 
-        Media gameOverBGM = new Media(getClass().getResource("/sound/nima.mp3").toExternalForm());
+        Media gameOverBGM = new Media(getClass().getResource("/sound/gameOver.mp3").toExternalForm());
         gameOverBGMPlayer = new MediaPlayer(gameOverBGM);
         gameOverBGMPlayer.setVolume(0.7);
         gameOverBGMPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        //gameOverBGMPlayer.play();
+        gameOverBGMPlayer.play();
     }
 
     public void playAgain() {

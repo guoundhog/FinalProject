@@ -936,12 +936,14 @@ public class SpecialController {
 
     private void moveX(Entity entity) {
         // 限制最大水平速度
-        if (entity.velocityX > GameConfig.maxVelocityX) {
-            entity.velocityX = GameConfig.maxVelocityX;
-        }
+        if (entity instanceof Player player){
+            if (player.velocityX > GameConfig.maxVelocityX) {
+                player.velocityX = GameConfig.maxVelocityX;
+            }
 
-        if (entity.velocityX < -GameConfig.maxVelocityX) {
-            entity.velocityX = -GameConfig.maxVelocityX;
+            if (player.velocityX < -GameConfig.maxVelocityX) {
+                player.velocityX = -GameConfig.maxVelocityX;
+            }
         }
 
         // 套用水平速度
@@ -1206,15 +1208,16 @@ public class SpecialController {
                 }
             }
             else {
-                if(dog.velocityX != 0 && dog.velocityX > 0) {
+                if(dog.velocityX > 0) {
                     dog.velocityX--;
                 }
-                else if(dog.velocityX != 0 && dog.velocityX < 0) {
+                else if(dog.velocityX < 0) {
                     dog.velocityX++;
                 }
             }
 
             updateEntity(dog);
+            System.out.println(dog.velocityX);
             dog.render();
         }
     }
