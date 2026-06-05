@@ -71,7 +71,7 @@ public class SpecialController {
     private MediaPlayer breakingPlayer;
     private MediaPlayer enemyBGMPlayer;
     private MediaPlayer gameOverBGMPlayer;
-
+    private double masterVolume = 1.0;
     // ================= 設定選單 =================
     private VBox settingPane;
     private boolean settingOpen = false;
@@ -79,7 +79,7 @@ public class SpecialController {
     private boolean gameFinished = false;
     private ImageView deathTransitionImage;
     private boolean respawning = false;
-    private int life = 3; // 生命數
+    private int life = 6; // 生命數
     private double saveX = GameConfig.TILE_SIZE;
     private double saveY = GameConfig.GROUND_Y - GameConfig.PLAYER_HEIGHT;
     private final List<ImageView> checkpoints = new ArrayList<>();
@@ -130,15 +130,15 @@ public class SpecialController {
 //    public static final int SPECIAL_BLOCK = 11;
 
     private final int[][] map = {
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6, 0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,9,0,0,5},
-            {5,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,5,5 ,5,0,0,0,0,0,0,0,0,0,2,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
-            {5,0,0,0,0,0,0,0,5,5,5,5, 0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,8,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,5,5,5,5 ,5,5,5,0,0,0,0,0,0,5,0,2,2,2,2, 5,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 5,6,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,5,0,0,0,0, 5,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1, 1,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,0,0,0,0,1,1,1,1,12,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}};
+            {5,0,0,0,0,0,0,0,0,0,0,2, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0, 2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5, 0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,0,9,0,0,5},
+            {5,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5, 5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
+            {5,0,0,0,0,0,0,0,5,5,5,5, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5, 5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,8,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5, 5,5,5,5,5,5,0,0,0,0,0,0,5,0,2,2,2,5,0,0,0,0,0,0,0,0,5,0,5,0,5,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, 5,6,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5, 5,5,5,5,5,5,5,5,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,5,0,0,0,0,0,5},
+            {5,1,1,1,1,1,1,1,1,1,1,1, 1,0,0,0,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,3,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,5}};
     private int[][] moveMap = new int[map.length][];
 
     // ================= 初始化 =================
@@ -173,7 +173,7 @@ public class SpecialController {
         Media bgm = new Media(getClass().getResource("/sound/bgm.mp3").toExternalForm());
         bgmPlayer = new MediaPlayer(bgm);
         bgmPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        bgmPlayer.setVolume(0.5);
+        bgmPlayer.setVolume(2);
         bgmPlayer.play();
 
         Media jump = new Media(getClass().getResource("/sound/jump.mp3").toExternalForm());
@@ -209,7 +209,7 @@ public class SpecialController {
         });
         Media shoot1 = new Media(getClass().getResource("/sound/shoot1.m4a").toExternalForm());
         shoot1Player = new MediaPlayer(shoot1);
-        shoot1Player.setVolume(0.7);
+        shoot1Player.setVolume(4);
         shoot1Player.setOnEndOfMedia(new Runnable() {
             @Override
             public void run() {
@@ -221,7 +221,7 @@ public class SpecialController {
 
         Media shoot2 = new Media(getClass().getResource("/sound/shoot2.m4a").toExternalForm());
         shoot2Player = new MediaPlayer(shoot2);
-        shoot2Player.setVolume(0.7);
+        shoot2Player.setVolume(4);
         shoot2Player.setOnEndOfMedia(new Runnable() {
             @Override
             public void run() {
@@ -233,7 +233,7 @@ public class SpecialController {
 
         Media shoot3 = new Media(getClass().getResource("/sound/shoot3.m4a").toExternalForm());
         shoot3Player = new MediaPlayer(shoot3);
-        shoot3Player.setVolume(0.7);
+        shoot3Player.setVolume(4);
         shoot3Player.setOnEndOfMedia(new Runnable() {
             @Override
             public void run() {
@@ -245,7 +245,7 @@ public class SpecialController {
 
         Media shoot4 = new Media(getClass().getResource("/sound/shoot4.m4a").toExternalForm());
         shoot4Player = new MediaPlayer(shoot4);
-        shoot4Player.setVolume(0.7);
+        shoot4Player.setVolume(5);
         shoot4Player.setOnEndOfMedia(new Runnable() {
             @Override
             public void run() {
@@ -257,7 +257,7 @@ public class SpecialController {
 
         Media shoot5 = new Media(getClass().getResource("/sound/shoot5.m4a").toExternalForm());
         shoot5Player = new MediaPlayer(shoot5);
-        shoot5Player.setVolume(0.7);
+        shoot5Player.setVolume(2);
         shoot5Player.setOnEndOfMedia(new Runnable() {
             @Override
             public void run() {
@@ -269,7 +269,45 @@ public class SpecialController {
 
         Media gameOverBGM = new Media(getClass().getResource("/sound/nima.mp3").toExternalForm());
         gameOverBGMPlayer = new MediaPlayer(gameOverBGM);
-        gameOverBGMPlayer.setVolume(0.7);
+        gameOverBGMPlayer.setVolume(1);
+        gameOverBGMPlayer.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                gameOverBGMPlayer.seek(Duration.ZERO);
+                gameOverBGMPlayer.pause();
+            }
+
+        });
+
+
+        updateAllVolume();
+    }
+
+    private void updateAllVolume() {
+
+        if (bgmPlayer != null) {
+            bgmPlayer.setVolume(0.5 * masterVolume);
+        }
+
+        if (jumpPlayer != null) {
+            jumpPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (landingPlayer != null) {
+            landingPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (breakingPlayer != null) {
+            breakingPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (enemyBGMPlayer != null) {
+            enemyBGMPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (dogPlayer != null) {
+            dogPlayer.setVolume(0.8 * masterVolume);
+        }
     }
 
     private void playJumpSound() {
@@ -384,6 +422,15 @@ public class SpecialController {
         title.setFill(Color.WHITE);
         title.setStyle("-fx-font-size: 24px;");
 
+        Text masterText = new Text("Master Volume");
+        masterText.setFill(Color.WHITE);
+        Slider masterSlider = new Slider(0, 1, 1);
+        masterSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+
+            masterVolume = newValue.doubleValue();
+            updateAllVolume();
+        });
+
         Text bgmText = new Text("BGM Volume");
         bgmText.setFill(Color.WHITE);
         Slider bgmSlider = new Slider(0, 1, 0.5);
@@ -414,6 +461,9 @@ public class SpecialController {
 
         settingPane.getChildren().addAll(
                 title,
+
+                masterText,
+                masterSlider,
                 bgmText,
                 bgmSlider,
                 jumpText,
@@ -460,11 +510,10 @@ public class SpecialController {
 
     private void playerDead() {
         if (respawning || mario.isDead) {return;}
-
+        gameOverBGMPlayer.play();
         life--;
         mario.isDead = true;
         keys.clear();
-        gameOverBGMPlayer.play();
         startDeathFlyAnimation();
     }
     private void startDeathFlyAnimation() {
@@ -511,6 +560,7 @@ public class SpecialController {
         }
     }
     private void playDeathImageTransition() {
+        masterVolume = 0;
         respawning = true;
 
         deathTransitionImage.toFront();
@@ -534,6 +584,7 @@ public class SpecialController {
         });
 
         pause.setOnFinished(e -> {
+
             fadeOut.play();
 
             respawning = false;
@@ -580,8 +631,8 @@ public class SpecialController {
 
         breakableBlocks.clear();
         breakableBlockHp.clear();
-
-        dogSoundPlayed = false;
+        masterVolume =1;
+//        dogSoundPlayed = false;
         killedNumber = 0;
         goal = null;
         checkpoint = null;
@@ -1099,7 +1150,6 @@ public class SpecialController {
                     enemy.velocityX *= -1;
                 }else {
                     entity.velocityX = 0;
-                    ;
                 }
             }else if (isSolidTile(right, ty) && entity.velocityX > 0) {
                 hitDangerBlock(ty, right);
@@ -1150,11 +1200,11 @@ public class SpecialController {
 
         // 往下落
         else if (entity.velocityY > 0) {
-            if (isSolidTile(left, bottom) || isSolidTile(right, bottom) || isBridge(left, bottom) || isBridge(right, bottom)) {
+            if (isSolidTile(left, bottom) || isSolidTile(right, bottom)) {
                 if(isSolidTile(left, bottom)){
                     hitDangerBlock(bottom, left);
                 }
-                else if(isSolidTile(right, bottom)){
+                if(isSolidTile(right, bottom)){
                     hitDangerBlock(bottom, right);
                 }
                 entity.y = bottom * GameConfig.TILE_SIZE - GameConfig.PLAYER_HEIGHT;
@@ -1176,16 +1226,20 @@ public class SpecialController {
         }
 
         else {
-            if (!(isSolidTile(left, bottom + 1) || isSolidTile(right, bottom + 1) || isBridge(left, bottom + 1) || isBridge(right, bottom + 1))) {
-
+            //腳下都沒有方塊
+            if (!(isSolidTile(left, bottom + 1) || isSolidTile(right, bottom + 1))) {
                 entity.onGround = false;
             }
-            else if(isSolidTile(left, bottom + 1)){
-                hitDangerBlock(bottom + 1, left);
+            //腳下有方塊
+            else{
+                if(isSolidTile(left, bottom + 1)){
+                    hitDangerBlock(bottom + 1, left);
+                }
+                if(isSolidTile(right, bottom + 1))S{
+                    hitDangerBlock(bottom + 1, right);
+                }
             }
-            else if(isSolidTile(right, bottom + 1)){
-                hitDangerBlock(bottom + 1, right);
-            }
+
         }
     }
 
@@ -1312,8 +1366,10 @@ public class SpecialController {
         // Mario 尚未走到指定位置前，鏡頭不移動
 
         //稍微讓Mario 可以左右移動，可用可不用
-        if (cameraX < mario.x - 380 && cameraX < (map[0].length - 1)*GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH - GameConfig.maxVelocityX) {
+        if (cameraX < mario.x - 380 && cameraX < (map[0].length - 1)
+                *GameConfig.TILE_SIZE - GameConfig.WINDOW_WIDTH - GameConfig.maxVelocityX) {
             cameraX += Math.max((mario.x - 380 - cameraX) * 0.3, 2);
+
         } else if (cameraX > mario.x - 370 && cameraX > GameConfig.TILE_SIZE+GameConfig.maxVelocityX){
             cameraX += Math.min((mario.x - 370 - cameraX) * 0.3, -2);
         }

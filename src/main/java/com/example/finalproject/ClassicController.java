@@ -58,6 +58,7 @@ public class ClassicController {
     private MediaPlayer landingPlayer;
     private MediaPlayer breakingPlayer;
     private MediaPlayer enemyBGMPlayer;
+    private double masterVolume = 1.0;
 
     // ================= 設定選單 =================
     private VBox settingPane;
@@ -119,13 +120,13 @@ public class ClassicController {
     private final int[][] map = {
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5},
-            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,5},
+            {5,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,9,0,0,5},
             {5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5 ,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,5,5,5,5,5,5},
             {5,4,4,4,4,5,0,0,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5 ,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,5,5,5,5,5,5 ,5,5,5,5,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
             {5,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,8,8,8,5,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,5,5,5,5,5,5,5,5,5 ,5,5,5,5,5,5,5,5,0,0,0,0,5,0,0,0,0,5,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,0,0,0,0,0,0,0,0,5},
-            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
+            {5,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1 ,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,0,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,5}
     };
     private int[][] movemap = new int[map.length][];
 
@@ -140,6 +141,7 @@ public class ClassicController {
         createFPSCounter();
         createDeathTransitionImage();
         setupMusic();
+
         createSettingPane();
         setupKeyboard();
         gameLoop();
@@ -179,6 +181,32 @@ public class ClassicController {
         Media enemyBGM = new Media(getClass().getResource("/sound/enemyBGM.mp3").toExternalForm());
         enemyBGMPlayer = new MediaPlayer(enemyBGM);
         enemyBGMPlayer.setVolume(0.7);
+
+        updateAllVolume();
+    }
+
+    private void updateAllVolume() {
+
+        if (bgmPlayer != null) {
+            bgmPlayer.setVolume(0.5 * masterVolume);
+        }
+
+        if (jumpPlayer != null) {
+            jumpPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (landingPlayer != null) {
+            landingPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (breakingPlayer != null) {
+            breakingPlayer.setVolume(0.7 * masterVolume);
+        }
+
+        if (enemyBGMPlayer != null) {
+            enemyBGMPlayer.setVolume(0.7 * masterVolume);
+        }
+
     }
 
     private void playJumpSound() {
@@ -292,6 +320,15 @@ public class ClassicController {
         title.setFill(Color.WHITE);
         title.setStyle("-fx-font-size: 24px;");
 
+        Text masterText = new Text("Master Volume");
+        masterText.setFill(Color.WHITE);
+        Slider masterSlider = new Slider(0, 1, 1);
+        masterSlider.valueProperty().addListener((obs, oldValue, newValue) -> {
+
+            masterVolume = newValue.doubleValue();
+            updateAllVolume();
+        });
+
         Text bgmText = new Text("BGM Volume");
         bgmText.setFill(Color.WHITE);
         Slider bgmSlider = new Slider(0, 1, 0.5);
@@ -322,6 +359,8 @@ public class ClassicController {
 
         settingPane.getChildren().addAll(
                 title,
+                masterText,
+                masterSlider,
                 bgmText,
                 bgmSlider,
                 jumpText,
