@@ -1235,7 +1235,7 @@ public class SpecialController {
                 if(isSolidTile(left, bottom + 1)){
                     hitDangerBlock(bottom + 1, left);
                 }
-                if(isSolidTile(right, bottom + 1))S{
+                if(isSolidTile(right, bottom + 1)){
                     hitDangerBlock(bottom + 1, right);
                 }
             }
